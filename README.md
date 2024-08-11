@@ -10,3 +10,9 @@ Note to self: dont veer off from the lesson material to skip ahead to advanced t
 - MutexGuards led to this article: https://cliffle.com/blog/rust-mutexes/
 - That article led to Ordering on Atomic types.
 - That led to a video explaining it ~1hr.
+
+
+# Links
+- https://doc.rust-lang.org/std/sync/atomic/enum.Ordering.html
+- https://doc.rust-lang.org/rust-by-example/mod/visibility.html
+- https://cliffle.com/blog/rust-mutexes/
