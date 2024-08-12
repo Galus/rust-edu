@@ -3,12 +3,14 @@
 use std::fs;
 
 #[derive(Debug)]
+#[allow(dead_code)] // REMOVE THIS WHEN DONE
 struct OpCode {
     l: u8,
     r: u8,
 }
 
 #[derive(Debug)]
+#[allow(dead_code)] // REMOVE THIS WHEN DONE
 struct Emulator {
     pub current_opcode: OpCode,
     /* Chip8 Memory layout
@@ -114,24 +116,30 @@ fn load_rom(emu: &mut Emulator) -> Result<bool, bool> {
 }
 
 fn main() {
-    println!("Init emulator");
+    println!("🧨 Initializing emulator");
     let mut emu: Emulator = Emulator::new();
-    println!("emu.memory {:x?}", emu.memory);
+    //println!("emu.memory {:x?}", emu.memory);
 
     // inits
+    println!("\t🖊️ Loading fonts into emulator...");
     let _ = load_font(&mut emu);
+
     let rom_path: &str = "maze.ch8";
+    println!("\t👁️ Reading rom {}...", rom_path);
     let rom_data: Vec<u8> = fs::read(rom_path).unwrap();
     emu.rom_buffer = rom_data.clone();
-    println!("BEFORE");
-    println!("\temu.rom_buffer {:x?}", emu.rom_buffer);
-    println!("\trom_data {:x?}", &rom_data);
-    let _ = load_rom(&mut emu); // clears emu.rom_buffer
-    println!("AFTER");
-    println!("\temu.rom_buffer {:x?}", emu.rom_buffer);
-    println!("\trom_data {:x?}", &rom_data);
 
-    println!("emu.memory {:x?}", emu.memory);
+    println!("\t🕹️ Loading rom into emulator...");
+    //println!("BEFORE");
+    //println!("\temu.rom_buffer {:x?}", emu.rom_buffer);
+    //println!("\trom_data {:x?}", &rom_data);
+    let _ = load_rom(&mut emu); // clears emu.rom_buffer
+                                //println!("AFTER");
+                                //println!("\temu.rom_buffer {:x?}", emu.rom_buffer);
+                                //println!("\trom_data {:x?}", &rom_data);
+
+    //println!("emu.memory {:x?}", emu.memory);
+    println!("🍸 Exiting...");
 }
 
 /* NOTES
