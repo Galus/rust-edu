@@ -5,143 +5,226 @@ use std::fs;
 #[derive(Debug)]
 struct OpCode(u16);
 impl OpCode {
+    //    EXEC    = 0x0FFF,
+    //    CLEAR   = 0x00E0,
+    //    //RETURN  = 0x00EE,
+    //    //JMP     = 0x1FFF,
+    //    //EXECSR  = 0x2FFF,
+    //    //SKIPEQ  = 0x3FFF,
+    //    //SKIPNE  = 0x4FFF,
+    //    //SKIPRE  = 0x5FF0,
+    //    //LOAD    = 0x6FFF,
+    //    //ADD     = 0x7FFF,
+    //    //LOADR   = 0x8FF0,
+    //    //OR      = 0x8FF1,
+    //    //AND     = 0x8FF2,
+    //    //XOR     = 0x8FF3,
+    //    //ADDC    = 0x8FF4,
+    //    //SUBC    = 0x8FF5,
+    //    //RSHIFT  = 0x8FF6, // Right shift
+    //    //SUB     = 0x8FF7,
+    //    //LSHIFT  = 0x8FFE,
+    //    //SKIPNE  = 0x9FF0,
+    //    //STORE   = 0xAFFF, // in register I
+    //    //JMP     = 0xBFFF,
+    //    //RAND    = 0xCFFF,
+    //    //DRAW    = 0xDFFF,
+    //    //SKIPKEY = 0xEF9E,
+    //    //SKIPNKEY = 0xEFA1,
+    //    //LDDELAY = 0xFF07,
+    //    //WAITKEY = 0xFF0A,
+    //    //DELAY   = 0xFF15,
+    //    //SOUND   = 0xFF18,
+
+    /// Fill registers v0 to vX inclusive.
+    /// Sets I = I + X + 1
     fn fx65(&self) {
         todo!()
     }
 
+    /// Store register vals v0 to vX inclusive in memory starting at address I.
+    /// Sets I = I + X + 1
     fn fx55(&self) {
         todo!()
     }
 
+    /// Store BCD of value in vX at addresses I, I+1, I+2
     fn fx33(&self) {
         todo!()
     }
 
+    /// Set I to memory address of the sprite data corresponding to hex digit stored in register vX
     fn fx29(&self) {
         todo!()
     }
 
+    /// Add the value stored in register vX to register I
     fn fx1e(&self) {
         todo!()
     }
 
+    /// Set the sound timer to value of register vX
     fn fx18(&self) {
         todo!()
     }
 
+    /// Set the delay timer to the value of register vX
     fn fx15(&self) {
         todo!()
     }
 
+    /// Wait for a keypress and store the result in register vX
     fn fx0a(&self) {
         todo!()
     }
 
+    /// Store the current value of the delay timer in register vX
     fn fx07(&self) {
         todo!()
     }
 
+    /// Skip the following instruction if the key corresponding to the hex value currently stored
+    /// in register vX is NOT pressed
     fn exa1(&self) {
         todo!()
     }
 
+    /// Skip the following instruction if the key corresponding to the hex value currently stored
+    /// in register vX is pressed
     fn ex9e(&self) {
         todo!()
     }
 
+    /// Draw a sprite at position vX, vY with N bytes of sprite data starting at the address
+    /// stored in I. Set vF to 01 if any set pixels are changed to unset, and 00 otherwise.
     fn dxyn(&self) {
         todo!()
     }
 
+    /// Set vX to a random number with a mask of NN
     fn cxnn(&self) {
         todo!()
     }
 
+    /// Jump to address NNN + v0
     fn bnnn(&self) {
         todo!()
     }
 
+    /// Store memory address NNN in register I
     fn annn(&self) {
         println!("hue hue hue");
         todo!()
     }
 
+    /// Skip the following instruction if the value of register vX is not equal to the value of
+    /// register vY.
     fn _9xy0(&self) {
         todo!()
     }
 
+    /// Store the value of register vY shifted left one bit in register vX
+    /// Set register vF to the most significant bit prior to the shift
+    /// vY is unchanged
     fn _8xye(&self) {
         todo!()
     }
 
+    /// Set register VX to the value of VY minus VX
+    /// Set VF to 00 if a borrow occurs
+    /// Set VF to 01 if a borrow does not occur
     fn _8xy7(&self) {
         todo!()
     }
 
+    /// Store the value of register VY shifted right one bit in register VX¹
+    /// Set register VF to the least significant bit prior to the shift
+    /// VY is unchanged
     fn _8xy6(&self) {
         todo!()
     }
 
+    /// Subtract the value of register VY from register VX
+    /// Set VF to 00 if a borrow occurs
+    /// Set VF to 01 if a borrow does not occur
     fn _8xy5(&self) {
         todo!()
     }
 
+    /// Add the value of register VY to register VX
+    /// Set VF to 01 if a carry occurs
+    /// Set VF to 00 if a carry does not occur
     fn _8xy4(&self) {
         todo!()
     }
 
+    /// Set vX to vX XOR vY
     fn _8xy3(&self) {
         todo!()
     }
 
+    /// Set vX to vX AND vY
     fn _8xy2(&self) {
         todo!()
     }
 
+    /// Set vX to vX OR vY
     fn _8xy1(&self) {
         todo!()
     }
 
+    /// Store the value of register vY in register vX
     fn _8xy0(&self) {
         todo!()
     }
 
+    /// Add the value NN to register vX
     fn _7xnn(&self) {
         todo!()
     }
 
+    /// Store the number NN in register vX
     fn _6xnn(&self) {
         todo!()
     }
 
+    /// Skip the following instruction if the value of register vX is equal to the value of
+    /// register vY.
     fn _5xy0(&self) {
         todo!()
     }
 
+    /// Skip the following instruction if the value of register vX is NOT equal to NN
     fn _4xnn(&self) {
         todo!()
     }
 
+    /// Skip the following instruction if the value of register vX is equal to NN
     fn _3xnn(&self) {
         todo!()
     }
 
+    /// Execute subroutine starting at address NNN
     fn _2nnn(&self) {
         todo!()
     }
 
+    /// Jump to address NNN
     fn _1nnn(&self) {
         todo!()
     }
 
+    /// Execute machine language subroutine at address NNN
     fn _0nnn(&self) {
         todo!()
     }
 
+    /// Clear the screen
     fn _00e0(&self) {
         todo!()
     }
 
+    /// Return from a subroutine
     fn _00ee(&self) {
         todo!()
     }
