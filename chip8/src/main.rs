@@ -3,24 +3,185 @@
 use std::fs;
 
 #[derive(Debug)]
-#[allow(dead_code)] // REMOVE THIS WHEN DONE
-struct OpCode {
-    l: u8,
-    r: u8,
+struct OpCode(u16);
+impl OpCode {
+    fn fx65(&self) {
+        todo!()
+    }
+
+    fn fx55(&self) {
+        todo!()
+    }
+
+    fn fx33(&self) {
+        todo!()
+    }
+
+    fn fx29(&self) {
+        todo!()
+    }
+
+    fn fx1e(&self) {
+        todo!()
+    }
+
+    fn fx18(&self) {
+        todo!()
+    }
+
+    fn fx15(&self) {
+        todo!()
+    }
+
+    fn fx0a(&self) {
+        todo!()
+    }
+
+    fn fx07(&self) {
+        todo!()
+    }
+
+    fn exa1(&self) {
+        todo!()
+    }
+
+    fn ex9e(&self) {
+        todo!()
+    }
+
+    fn dxyn(&self) {
+        todo!()
+    }
+
+    fn cxnn(&self) {
+        todo!()
+    }
+
+    fn bnnn(&self) {
+        todo!()
+    }
+
+    fn annn(&self) {
+        println!("hue hue hue");
+        todo!()
+    }
+
+    fn _9xy0(&self) {
+        todo!()
+    }
+
+    fn _8xye(&self) {
+        todo!()
+    }
+
+    fn _8xy7(&self) {
+        todo!()
+    }
+
+    fn _8xy6(&self) {
+        todo!()
+    }
+
+    fn _8xy5(&self) {
+        todo!()
+    }
+
+    fn _8xy4(&self) {
+        todo!()
+    }
+
+    fn _8xy3(&self) {
+        todo!()
+    }
+
+    fn _8xy2(&self) {
+        todo!()
+    }
+
+    fn _8xy1(&self) {
+        todo!()
+    }
+
+    fn _8xy0(&self) {
+        todo!()
+    }
+
+    fn _7xnn(&self) {
+        todo!()
+    }
+
+    fn _6xnn(&self) {
+        todo!()
+    }
+
+    fn _5xy0(&self) {
+        todo!()
+    }
+
+    fn _4xnn(&self) {
+        todo!()
+    }
+
+    fn _3xnn(&self) {
+        todo!()
+    }
+
+    fn _2nnn(&self) {
+        todo!()
+    }
+
+    fn _1nnn(&self) {
+        todo!()
+    }
+
+    fn _0nnn(&self) {
+        todo!()
+    }
+
+    fn _00e0(&self) {
+        todo!()
+    }
+
+    fn _00ee(&self) {
+        todo!()
+    }
+}
+
+trait Nibbles {
+    fn into_tuple(&self) -> (u8, u8, u8, u8);
+    fn into_vec(&self) -> Vec<u8>;
+}
+
+impl Nibbles for OpCode {
+    fn into_tuple(&self) -> (u8, u8, u8, u8) {
+        (
+            ((0xF000 & self.0) >> 12) as u8,
+            ((0x0F00 & self.0) >> 8) as u8,
+            ((0x00F0 & self.0) >> 4) as u8,
+            (0x000F & self.0) as u8,
+        )
+    }
+
+    fn into_vec(&self) -> Vec<u8> {
+        let nibbles: Vec<u8> = vec![
+            ((0xF000 & self.0) >> 12) as u8,
+            ((0x0F00 & self.0) >> 8) as u8,
+            ((0x00F0 & self.0) >> 4) as u8,
+            (0x000F & self.0) as u8,
+        ];
+        nibbles
+    }
 }
 
 #[derive(Debug)]
 #[allow(dead_code)] // REMOVE THIS WHEN DONE
 struct Emulator {
     pub current_opcode: OpCode,
-    /* Chip8 Memory layout
-    0x000-0x04F - Chip 8 interpreter (contains font set in emu)       0 -   79
-    0x050-0x0A0 - Used for the built in 4x5 pixel font set (0-F)    080 -  160
-    0x200-0xFFF - Program ROM and work RAM                          512 - 4096 */
     memory: [u8; 4096],
 
-    registers: [u8; 16],
-    index_register: u16,
+    registers: [u8; 16], // general purpose
+    index_register: u16, // can only load 12-bit mem address due to range of mem accessible
+    //                      1111 1111 1111 -> 0xFFF -> 4095 -> memsize
     program_counter: u16,
 
     pub screen: [bool; 64 * 32],
@@ -39,11 +200,11 @@ struct Emulator {
 impl Emulator {
     pub fn new() -> Emulator {
         Emulator {
-            current_opcode: OpCode { l: 0, r: 0 },
+            current_opcode: OpCode(0),
             memory: [0; 4096],
             registers: [0; 16],
             index_register: 0,
-            program_counter: 0,
+            program_counter: 0x200,
             screen: [false; 64 * 32],
             stack: [0; 16],
             stack_pointer: 0,
@@ -115,6 +276,49 @@ fn load_rom(emu: &mut Emulator) -> Result<bool, bool> {
     Ok(true)
 }
 
+/// Map the OpCode to an actual function.
+fn process(op: OpCode) {
+    // DECODE and Process
+    match op.into_tuple() {
+        (0, 0, 0xE, 0xE) => op._00ee(),
+        (0, 0, 0xE, 0) => op._00e0(),
+        (0, _, _, _) => op._0nnn(),
+        (1, _, _, _) => op._1nnn(),
+        (2, _, _, _) => op._2nnn(),
+        (3, _, _, _) => op._3xnn(),
+        (4, _, _, _) => op._4xnn(),
+        (5, _, _, 0) => op._5xy0(),
+        (6, _, _, _) => op._6xnn(),
+        (7, _, _, _) => op._7xnn(),
+        (8, _, _, 0) => op._8xy0(),
+        (8, _, _, 1) => op._8xy1(),
+        (8, _, _, 2) => op._8xy2(),
+        (8, _, _, 3) => op._8xy3(),
+        (8, _, _, 4) => op._8xy4(),
+        (8, _, _, 5) => op._8xy5(),
+        (8, _, _, 6) => op._8xy6(),
+        (8, _, _, 7) => op._8xy7(),
+        (8, _, _, 0xE) => op._8xye(),
+        (9, _, _, 0) => op._9xy0(),
+        (0xA, _, _, _) => op.annn(),
+        (0xB, _, _, _) => op.bnnn(),
+        (0xC, _, _, _) => op.cxnn(),
+        (0xD, _, _, _) => op.dxyn(),
+        (0xE, _, 9, 0xE) => op.ex9e(),
+        (0xE, _, 0xA, 1) => op.exa1(),
+        (0xF, _, 0, 7) => op.fx07(),
+        (0xF, _, 0, 0xA) => op.fx0a(),
+        (0xF, _, 1, 5) => op.fx15(),
+        (0xF, _, 1, 8) => op.fx18(),
+        (0xF, _, 1, 0xE) => op.fx1e(),
+        (0xF, _, 2, 9) => op.fx29(),
+        (0xF, _, 3, 3) => op.fx33(),
+        (0xF, _, 5, 5) => op.fx55(),
+        (0xF, _, 6, 5) => op.fx65(),
+        (a, b, c, d) => println!("Not implemented {:x?}", (a, b, c, d)),
+    }
+}
+
 fn main() {
     println!("🧨 Initializing emulator");
     let mut emu: Emulator = Emulator::new();
@@ -138,8 +342,38 @@ fn main() {
                                 //println!("\temu.rom_buffer {:x?}", emu.rom_buffer);
                                 //println!("\trom_data {:x?}", &rom_data);
 
-    //println!("emu.memory {:x?}", emu.memory);
+    loop {
+        // instruction cycle
+        // - fetch
+        let _ = fetch_opcode(&mut emu);
+        //println!("current_opcode {:x?}", emu.current_opcode);
+        //println!("co.into_vec {:x?}", emu.current_opcode.into_vec());
+        //println!("co.into_tuple {:x?}", emu.current_opcode.into_tuple());
+
+        // - decode and execute
+        let _ = process(emu.current_opcode);
+
+        // Trying to figure out how to have above return a fn ptr
+
+        // display
+        // input
+
+        break;
+    }
+
+    println!("emu.memory {:x?}", emu.memory);
     println!("🍸 Exiting...");
+}
+
+fn fetch_opcode(emu: &mut Emulator) -> Result<bool, bool> {
+    // PsuedoCode:
+    //   OpCode = concat( memory[*pc], memory[*pc+1] ) = the opcode is at ProgramCounter and PC+1
+    let opcode_high: u8 = emu.memory[emu.program_counter as usize];
+    let opcode_low: u8 = emu.memory[emu.program_counter as usize + 1];
+    let opcode: u16 = (opcode_high as u16) << 8 | opcode_low as u16;
+    emu.current_opcode = OpCode(opcode);
+    // println!("current_opcode {:x?}", opcode);
+    Ok(true)
 }
 
 /* NOTES
@@ -148,4 +382,76 @@ Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height 
 Each row of 8 pixels is read as bit-coded starting from memory location I; I value does not change after the execution of this instruction.
 As described above, VF is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that does not happen.
 
+*/
+
+// COOL IDEA but im not ready for macros yet
+//macro_rules! opcodes {
+//    ($name: ident <$word: ty> { $($op: ident = $code: expr),+ $(,)? }) => {
+//        #[derive(Debug, Clone, Copy)]
+//        pub enum $name {
+//            $($op = ( ($code & 0xF000) >> 12,$code & 0x000F)),+
+//        }
+//
+//        impl $name {
+//            pub fn to_inst(self) -> $word {
+//                self.into()
+//            }
+//        }
+//
+//        impl Into<$word> for $name {
+//            fn into(self) -> $word {
+//                self as $word
+//            }
+//        }
+//    };
+//}
+//opcodes!(OpCode<u16> {
+//    EXEC    = 0x0FFF,
+//    CLEAR   = 0x00E0,
+//    //RETURN  = 0x00EE,
+//    //JMP     = 0x1FFF,
+//    //EXECSR  = 0x2FFF,
+//    //SKIPEQ  = 0x3FFF,
+//    //SKIPNE  = 0x4FFF,
+//    //SKIPRE  = 0x5FF0,
+//    //LOAD    = 0x6FFF,
+//    //ADD     = 0x7FFF,
+//    //LOADR   = 0x8FF0,
+//    //OR      = 0x8FF1,
+//    //AND     = 0x8FF2,
+//    //XOR     = 0x8FF3,
+//    //ADDC    = 0x8FF4,
+//    //SUBC    = 0x8FF5,
+//    //RSHIFT  = 0x8FF6, // Right shift
+//    //SUB     = 0x8FF7,
+//    //LSHIFT  = 0x8FFE,
+//    //SKIPNE  = 0x9FF0,
+//    //STORE   = 0xAFFF, // in register I
+//    //JMP     = 0xBFFF,
+//    //RAND    = 0xCFFF,
+//    //DRAW    = 0xDFFF,
+//    //SKIPKEY = 0xEF9E,
+//    //SKIPNKEY = 0xEFA1,
+//    //LDDELAY = 0xFF07,
+//    //WAITKEY = 0xFF0A,
+//    //DELAY   = 0xFF15,
+//    //SOUND   = 0xFF18,
+//    //ADDRI   = 0xFF1E,
+//
+//    // 1111 1011 0000 1010
+//    // 1111 1111 0000 1010
+//// xor 0000
+//
+//
+//
+//});
+
+/* Chip8 Memory layout
+0x000-0x04F - Chip 8 interpreter (contains font set in emu)       0 -   79
+0x050-0x0A0 - Used for the built in 4x5 pixel font set (0-F)    080 -  160
+0x200-0xFFF - Program ROM and work RAM                          512 - 4096
+
+0x200-0xE8F
+"final 352 bytes of memory are reserved for “variables and display refresh"
+https://github.com/mattmikolay/chip-8/wiki/CHIP%E2%80%908-Technical-Reference#registers
 */
