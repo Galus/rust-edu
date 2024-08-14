@@ -55,195 +55,224 @@ impl OpCode {
 
     /// Fill registers v0 to vX inclusive.
     /// Sets I = I + X + 1
-    fn fx65(&self) {
+    /// The interpreter reads values from memory starting at location I into registers V0 through Vx.
+    fn fx65(emu: Emulator) {
+        //let num_registers = OpCode::get_x(&emu);
+        //let mut i = emu.index_register; // max 12 bits
+        //for register in 0..num_registers {
+        //    let &(mut reg) = &emu.registers[register as usize];
+        //}
         todo!()
     }
 
     /// Store register vals v0 to vX inclusive in memory starting at address I.
     /// Sets I = I + X + 1
-    fn fx55(&self) {
+    fn fx55(emu: Emulator) {
         todo!()
     }
 
     /// Store BCD of value in vX at addresses I, I+1, I+2
-    fn fx33(&self) {
+    fn fx33(emu: Emulator) {
+        let x = OpCode::get_x(&emu);
+        let register = emu.registers[x as usize];
+        let padded = format!("{:0>3}", register);
+        let a = padded.chars().nth(0);
+        let b = padded.chars().nth(1);
+        let c = padded.chars().nth(2);
+        //a.to_digit
         todo!()
     }
 
     /// Set I to memory address of the sprite data corresponding to hex digit stored in register vX
-    fn fx29(&self) {
+    fn fx29(emu: Emulator) {
         todo!()
     }
 
     /// Add the value stored in register vX to register I
-    fn fx1e(&self) {
+    fn fx1e(emu: Emulator) {
         todo!()
     }
 
     /// Set the sound timer to value of register vX
-    fn fx18(&self) {
+    fn fx18(emu: Emulator) {
         todo!()
     }
 
     /// Set the delay timer to the value of register vX
-    fn fx15(&self) {
+    fn fx15(emu: Emulator) {
         todo!()
     }
 
     /// Wait for a keypress and store the result in register vX
-    fn fx0a(&self) {
+    fn fx0a(emu: Emulator) {
         todo!()
     }
 
     /// Store the current value of the delay timer in register vX
-    fn fx07(&self) {
+    fn fx07(emu: Emulator) {
         todo!()
     }
 
     /// Skip the following instruction if the key corresponding to the hex value currently stored
     /// in register vX is NOT pressed
-    fn exa1(&self) {
+    fn exa1(emu: Emulator) {
         todo!()
     }
 
     /// Skip the following instruction if the key corresponding to the hex value currently stored
     /// in register vX is pressed
-    fn ex9e(&self) {
+    fn ex9e(emu: Emulator) {
         todo!()
     }
 
     /// Draw a sprite at position vX, vY with N bytes of sprite data starting at the address
     /// stored in I. Set vF to 01 if any set pixels are changed to unset, and 00 otherwise.
-    fn dxyn(&self) {
+    fn dxyn(emu: Emulator) {
         todo!()
     }
 
     /// Set vX to a random number with a mask of NN
-    fn cxnn(&self) {
+    fn cxnn(emu: Emulator) {
         todo!()
     }
 
     /// Jump to address NNN + v0
-    fn bnnn(&self) {
+    fn bnnn(emu: Emulator) {
         todo!()
     }
 
     /// Store memory address NNN in register I
-    fn annn(&self) {
+    fn annn(emu: Emulator) {
         println!("hue hue hue");
         todo!()
     }
 
     /// Skip the following instruction if the value of register vX is not equal to the value of
     /// register vY.
-    fn _9xy0(&self) {
+    fn _9xy0(emu: Emulator) {
         todo!()
     }
 
     /// Store the value of register vY shifted left one bit in register vX
     /// Set register vF to the most significant bit prior to the shift
     /// vY is unchanged
-    fn _8xye(&self) {
+    fn _8xye(emu: Emulator) {
         todo!()
     }
 
     /// Set register VX to the value of VY minus VX
     /// Set VF to 00 if a borrow occurs
     /// Set VF to 01 if a borrow does not occur
-    fn _8xy7(&self) {
+    fn _8xy7(emu: Emulator) {
         todo!()
     }
 
     /// Store the value of register VY shifted right one bit in register VX¹
     /// Set register VF to the least significant bit prior to the shift
     /// VY is unchanged
-    fn _8xy6(&self) {
+    fn _8xy6(emu: Emulator) {
         todo!()
     }
 
     /// Subtract the value of register VY from register VX
     /// Set VF to 00 if a borrow occurs
     /// Set VF to 01 if a borrow does not occur
-    fn _8xy5(&self) {
+    fn _8xy5(emu: Emulator) {
         todo!()
     }
 
     /// Add the value of register VY to register VX
     /// Set VF to 01 if a carry occurs
     /// Set VF to 00 if a carry does not occur
-    fn _8xy4(&self) {
+    fn _8xy4(emu: Emulator) {
         todo!()
     }
 
     /// Set vX to vX XOR vY
-    fn _8xy3(&self) {
+    fn _8xy3(emu: Emulator) {
         todo!()
     }
 
     /// Set vX to vX AND vY
-    fn _8xy2(&self) {
+    fn _8xy2(emu: Emulator) {
         todo!()
     }
 
     /// Set vX to vX OR vY
-    fn _8xy1(&self) {
+    fn _8xy1(emu: Emulator) {
         todo!()
     }
 
     /// Store the value of register vY in register vX
-    fn _8xy0(&self) {
+    fn _8xy0(emu: Emulator) {
         todo!()
     }
 
     /// Add the value NN to register vX
-    fn _7xnn(&self) {
+    fn _7xnn(emu: Emulator) {
         todo!()
     }
 
     /// Store the number NN in register vX
-    fn _6xnn(&self) {
+    fn _6xnn(emu: Emulator) {
         todo!()
     }
 
     /// Skip the following instruction if the value of register vX is equal to the value of
     /// register vY.
-    fn _5xy0(&self) {
+    fn _5xy0(emu: Emulator) {
         todo!()
     }
 
     /// Skip the following instruction if the value of register vX is NOT equal to NN
-    fn _4xnn(&self) {
+    fn _4xnn(emu: Emulator) {
         todo!()
     }
 
     /// Skip the following instruction if the value of register vX is equal to NN
-    fn _3xnn(&self) {
+    fn _3xnn(emu: Emulator) {
         todo!()
     }
 
     /// Execute subroutine starting at address NNN
-    fn _2nnn(&self) {
+    fn _2nnn(emu: Emulator) {
         todo!()
     }
 
     /// Jump to address NNN
-    fn _1nnn(&self) {
+    fn _1nnn(emu: Emulator) {
         todo!()
     }
 
     /// Execute machine language subroutine at address NNN
-    fn _0nnn(&self) {
+    fn _0nnn(emu: Emulator) {
         todo!()
     }
 
     /// Clear the screen
-    fn _00e0(&self) {
+    fn _00e0(emu: Emulator) {
         todo!()
     }
 
     /// Return from a subroutine
-    fn _00ee(&self) {
+    fn _00ee(emu: Emulator) {
         todo!()
+    }
+
+    /// Returns current opcodes 2nd nibble
+    fn get_x(emu: &Emulator) -> u8 {
+        //let op = emu.current_opcode;
+        //let (_, x, _, _) = op.into_tuple();
+        //x
+        emu.current_opcode.into_tuple().1
+    }
+
+    /// Returns current opcodes 3rd nibble
+    fn get_y(emu: &Emulator) -> u8 {
+        //let op = emu.current_opcode;
+        //let (_, _, y, _) = op.into_tuple();
+        //y
+        emu.current_opcode.into_tuple().2
     }
 }
 
@@ -280,6 +309,7 @@ struct Emulator {
     memory: [u8; 4096],
 
     registers: [u8; 16], // general purpose
+    /// Address of the current instruction
     index_register: u16, // can only load 12-bit mem address due to range of mem accessible
     //                      1111 1111 1111 -> 0xFFF -> 4095 -> memsize
     program_counter: u16,
@@ -376,45 +406,46 @@ fn load_rom(emu: &mut Emulator) -> Result<bool, bool> {
     Ok(true)
 }
 
-/// Map the OpCode to an actual function.
-fn process(op: OpCode) {
+/// Map the current OpCode to an actual function.
+fn process(emu: Emulator) {
     // DECODE and Process
+    let op = emu.current_opcode;
     match op.into_tuple() {
-        (0, 0, 0xE, 0xE) => op._00ee(),
-        (0, 0, 0xE, 0) => op._00e0(),
-        (0, _, _, _) => op._0nnn(),
-        (1, _, _, _) => op._1nnn(),
-        (2, _, _, _) => op._2nnn(),
-        (3, _, _, _) => op._3xnn(),
-        (4, _, _, _) => op._4xnn(),
-        (5, _, _, 0) => op._5xy0(),
-        (6, _, _, _) => op._6xnn(),
-        (7, _, _, _) => op._7xnn(),
-        (8, _, _, 0) => op._8xy0(),
-        (8, _, _, 1) => op._8xy1(),
-        (8, _, _, 2) => op._8xy2(),
-        (8, _, _, 3) => op._8xy3(),
-        (8, _, _, 4) => op._8xy4(),
-        (8, _, _, 5) => op._8xy5(),
-        (8, _, _, 6) => op._8xy6(),
-        (8, _, _, 7) => op._8xy7(),
-        (8, _, _, 0xE) => op._8xye(),
-        (9, _, _, 0) => op._9xy0(),
-        (0xA, _, _, _) => op.annn(),
-        (0xB, _, _, _) => op.bnnn(),
-        (0xC, _, _, _) => op.cxnn(),
-        (0xD, _, _, _) => op.dxyn(),
-        (0xE, _, 9, 0xE) => op.ex9e(),
-        (0xE, _, 0xA, 1) => op.exa1(),
-        (0xF, _, 0, 7) => op.fx07(),
-        (0xF, _, 0, 0xA) => op.fx0a(),
-        (0xF, _, 1, 5) => op.fx15(),
-        (0xF, _, 1, 8) => op.fx18(),
-        (0xF, _, 1, 0xE) => op.fx1e(),
-        (0xF, _, 2, 9) => op.fx29(),
-        (0xF, _, 3, 3) => op.fx33(),
-        (0xF, _, 5, 5) => op.fx55(),
-        (0xF, _, 6, 5) => op.fx65(),
+        (0, 0, 0xE, 0xE) => OpCode::_00ee(emu),
+        (0, 0, 0xE, 0) => OpCode::_00e0(emu),
+        (0, _, _, _) => OpCode::_0nnn(emu),
+        (1, _, _, _) => OpCode::_1nnn(emu),
+        (2, _, _, _) => OpCode::_2nnn(emu),
+        (3, _, _, _) => OpCode::_3xnn(emu),
+        (4, _, _, _) => OpCode::_4xnn(emu),
+        (5, _, _, 0) => OpCode::_5xy0(emu),
+        (6, _, _, _) => OpCode::_6xnn(emu),
+        (7, _, _, _) => OpCode::_7xnn(emu),
+        (8, _, _, 0) => OpCode::_8xy0(emu),
+        (8, _, _, 1) => OpCode::_8xy1(emu),
+        (8, _, _, 2) => OpCode::_8xy2(emu),
+        (8, _, _, 3) => OpCode::_8xy3(emu),
+        (8, _, _, 4) => OpCode::_8xy4(emu),
+        (8, _, _, 5) => OpCode::_8xy5(emu),
+        (8, _, _, 6) => OpCode::_8xy6(emu),
+        (8, _, _, 7) => OpCode::_8xy7(emu),
+        (8, _, _, 0xE) => OpCode::_8xye(emu),
+        (9, _, _, 0) => OpCode::_9xy0(emu),
+        (0xA, _, _, _) => OpCode::annn(emu),
+        (0xB, _, _, _) => OpCode::bnnn(emu),
+        (0xC, _, _, _) => OpCode::cxnn(emu),
+        (0xD, _, _, _) => OpCode::dxyn(emu),
+        (0xE, _, 9, 0xE) => OpCode::ex9e(emu),
+        (0xE, _, 0xA, 1) => OpCode::exa1(emu),
+        (0xF, _, 0, 7) => OpCode::fx07(emu),
+        (0xF, _, 0, 0xA) => OpCode::fx0a(emu),
+        (0xF, _, 1, 5) => OpCode::fx15(emu),
+        (0xF, _, 1, 8) => OpCode::fx18(emu),
+        (0xF, _, 1, 0xE) => OpCode::fx1e(emu),
+        (0xF, _, 2, 9) => OpCode::fx29(emu),
+        (0xF, _, 3, 3) => OpCode::fx33(emu),
+        (0xF, _, 5, 5) => OpCode::fx55(emu),
+        (0xF, _, 6, 5) => OpCode::fx65(emu),
         (a, b, c, d) => println!("Not implemented {:x?}", (a, b, c, d)),
     }
 }
@@ -451,7 +482,7 @@ fn main() {
         //println!("co.into_tuple {:x?}", emu.current_opcode.into_tuple());
 
         // - decode and execute
-        let _ = process(emu.current_opcode);
+        let _ = process(&mut emu);
 
         // Trying to figure out how to have above return a fn ptr
 
