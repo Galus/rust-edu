@@ -56,7 +56,7 @@ impl OpCode {
     /// Fill registers v0 to vX inclusive.
     /// Sets I = I + X + 1
     /// The interpreter reads values from memory starting at location I into registers V0 through Vx.
-    fn fx65(emu: Emulator) {
+    fn fx65(emu: &mut Emulator) {
         //let num_registers = OpCode::get_x(&emu);
         //let mut i = emu.index_register; // max 12 bits
         //for register in 0..num_registers {
@@ -67,195 +67,209 @@ impl OpCode {
 
     /// Store register vals v0 to vX inclusive in memory starting at address I.
     /// Sets I = I + X + 1
-    fn fx55(emu: Emulator) {
+    fn fx55(emu: &mut Emulator) {
         todo!()
     }
 
     /// Store BCD of value in vX at addresses I, I+1, I+2
-    fn fx33(emu: Emulator) {
+    fn fx33(emu: &mut Emulator) {
         let x = OpCode::get_x(&emu);
         let register = emu.registers[x as usize];
         let padded = format!("{:0>3}", register);
-        let a = padded.chars().nth(0);
-        let b = padded.chars().nth(1);
-        let c = padded.chars().nth(2);
-        //a.to_digit
-        todo!()
+        let a: u8 = padded.chars().nth(0).unwrap() as u8 - 48; // ascii '0' starts at decimal 48
+        let b: u8 = padded.chars().nth(1).unwrap() as u8 - 48;
+        let c: u8 = padded.chars().nth(2).unwrap() as u8 - 48;
+        let index = emu.index_register as usize;
+        emu.memory[index] = a;
+        emu.memory[index + 1] = b;
+        emu.memory[index + 2] = c;
     }
 
     /// Set I to memory address of the sprite data corresponding to hex digit stored in register vX
-    fn fx29(emu: Emulator) {
+    fn fx29(emu: &mut Emulator) {
         todo!()
     }
 
     /// Add the value stored in register vX to register I
-    fn fx1e(emu: Emulator) {
-        todo!()
+    /// Set I = I + Vx.
+    /// The values of I and Vx are added, and the results are stored in I.
+    fn fx1e(emu: &mut Emulator) {
+        let x = OpCode::get_x(emu);
+        let vx = &emu.registers[x as usize];
+        let i = &emu.index_register;
+        let new_i = (*vx) as u16 + i;
+        emu.index_register = new_i;
     }
 
     /// Set the sound timer to value of register vX
-    fn fx18(emu: Emulator) {
-        todo!()
+    fn fx18(emu: &mut Emulator) {
+        let x = OpCode::get_x(emu);
+        let vx = emu.registers[x as usize];
+        emu.sound_timer = vx;
     }
 
     /// Set the delay timer to the value of register vX
-    fn fx15(emu: Emulator) {
-        todo!()
+    fn fx15(emu: &mut Emulator) {
+        let x = OpCode::get_x(emu);
+        let vx = emu.registers[x as usize];
+        emu.delay_timer = vx;
     }
 
     /// Wait for a keypress and store the result in register vX
-    fn fx0a(emu: Emulator) {
+    fn fx0a(emu: &mut Emulator) {
         todo!()
     }
 
     /// Store the current value of the delay timer in register vX
-    fn fx07(emu: Emulator) {
-        todo!()
+    fn fx07(emu: &mut Emulator) {
+        let delay_timer = emu.delay_timer;
+        let x = OpCode::get_x(emu);
+        emu.registers[x as usize] = delay_timer;
     }
 
     /// Skip the following instruction if the key corresponding to the hex value currently stored
     /// in register vX is NOT pressed
-    fn exa1(emu: Emulator) {
+    fn exa1(emu: &mut Emulator) {
         todo!()
     }
 
     /// Skip the following instruction if the key corresponding to the hex value currently stored
     /// in register vX is pressed
-    fn ex9e(emu: Emulator) {
+    fn ex9e(emu: &mut Emulator) {
         todo!()
     }
 
     /// Draw a sprite at position vX, vY with N bytes of sprite data starting at the address
     /// stored in I. Set vF to 01 if any set pixels are changed to unset, and 00 otherwise.
-    fn dxyn(emu: Emulator) {
+    fn dxyn(emu: &mut Emulator) {
         todo!()
     }
 
     /// Set vX to a random number with a mask of NN
-    fn cxnn(emu: Emulator) {
+    fn cxnn(emu: &mut Emulator) {
         todo!()
     }
 
     /// Jump to address NNN + v0
-    fn bnnn(emu: Emulator) {
+    fn bnnn(emu: &mut Emulator) {
         todo!()
     }
 
     /// Store memory address NNN in register I
-    fn annn(emu: Emulator) {
+    fn annn(emu: &mut Emulator) {
         println!("hue hue hue");
         todo!()
     }
 
     /// Skip the following instruction if the value of register vX is not equal to the value of
     /// register vY.
-    fn _9xy0(emu: Emulator) {
+    fn _9xy0(emu: &mut Emulator) {
         todo!()
     }
 
     /// Store the value of register vY shifted left one bit in register vX
     /// Set register vF to the most significant bit prior to the shift
     /// vY is unchanged
-    fn _8xye(emu: Emulator) {
+    fn _8xye(emu: &mut Emulator) {
         todo!()
     }
 
     /// Set register VX to the value of VY minus VX
     /// Set VF to 00 if a borrow occurs
     /// Set VF to 01 if a borrow does not occur
-    fn _8xy7(emu: Emulator) {
+    fn _8xy7(emu: &mut Emulator) {
         todo!()
     }
 
     /// Store the value of register VY shifted right one bit in register VX¹
     /// Set register VF to the least significant bit prior to the shift
     /// VY is unchanged
-    fn _8xy6(emu: Emulator) {
+    fn _8xy6(emu: &mut Emulator) {
         todo!()
     }
 
     /// Subtract the value of register VY from register VX
     /// Set VF to 00 if a borrow occurs
     /// Set VF to 01 if a borrow does not occur
-    fn _8xy5(emu: Emulator) {
+    fn _8xy5(emu: &mut Emulator) {
         todo!()
     }
 
     /// Add the value of register VY to register VX
     /// Set VF to 01 if a carry occurs
     /// Set VF to 00 if a carry does not occur
-    fn _8xy4(emu: Emulator) {
+    fn _8xy4(emu: &mut Emulator) {
         todo!()
     }
 
     /// Set vX to vX XOR vY
-    fn _8xy3(emu: Emulator) {
+    fn _8xy3(emu: &mut Emulator) {
         todo!()
     }
 
     /// Set vX to vX AND vY
-    fn _8xy2(emu: Emulator) {
+    fn _8xy2(emu: &mut Emulator) {
         todo!()
     }
 
     /// Set vX to vX OR vY
-    fn _8xy1(emu: Emulator) {
+    fn _8xy1(emu: &mut Emulator) {
         todo!()
     }
 
     /// Store the value of register vY in register vX
-    fn _8xy0(emu: Emulator) {
+    fn _8xy0(emu: &mut Emulator) {
         todo!()
     }
 
     /// Add the value NN to register vX
-    fn _7xnn(emu: Emulator) {
+    fn _7xnn(emu: &mut Emulator) {
         todo!()
     }
 
     /// Store the number NN in register vX
-    fn _6xnn(emu: Emulator) {
+    fn _6xnn(emu: &mut Emulator) {
         todo!()
     }
 
     /// Skip the following instruction if the value of register vX is equal to the value of
     /// register vY.
-    fn _5xy0(emu: Emulator) {
+    fn _5xy0(emu: &mut Emulator) {
         todo!()
     }
 
     /// Skip the following instruction if the value of register vX is NOT equal to NN
-    fn _4xnn(emu: Emulator) {
+    fn _4xnn(emu: &mut Emulator) {
         todo!()
     }
 
     /// Skip the following instruction if the value of register vX is equal to NN
-    fn _3xnn(emu: Emulator) {
+    fn _3xnn(emu: &mut Emulator) {
         todo!()
     }
 
     /// Execute subroutine starting at address NNN
-    fn _2nnn(emu: Emulator) {
+    fn _2nnn(emu: &mut Emulator) {
         todo!()
     }
 
     /// Jump to address NNN
-    fn _1nnn(emu: Emulator) {
+    fn _1nnn(emu: &mut Emulator) {
         todo!()
     }
 
     /// Execute machine language subroutine at address NNN
-    fn _0nnn(emu: Emulator) {
+    fn _0nnn(emu: &mut Emulator) {
         todo!()
     }
 
     /// Clear the screen
-    fn _00e0(emu: Emulator) {
+    fn _00e0(emu: &Emulator) {
         todo!()
     }
 
     /// Return from a subroutine
-    fn _00ee(emu: Emulator) {
+    fn _00ee(emu: &Emulator) {
         todo!()
     }
 
@@ -407,9 +421,9 @@ fn load_rom(emu: &mut Emulator) -> Result<bool, bool> {
 }
 
 /// Map the current OpCode to an actual function.
-fn process(emu: Emulator) {
+fn process(emu: &mut Emulator) {
     // DECODE and Process
-    let op = emu.current_opcode;
+    let op = &emu.current_opcode;
     match op.into_tuple() {
         (0, 0, 0xE, 0xE) => OpCode::_00ee(emu),
         (0, 0, 0xE, 0) => OpCode::_00e0(emu),
@@ -586,3 +600,31 @@ As described above, VF is set to 1 if any screen pixels are flipped from set to 
 "final 352 bytes of memory are reserved for “variables and display refresh"
 https://github.com/mattmikolay/chip-8/wiki/CHIP%E2%80%908-Technical-Reference#registers
 */
+
+#[cfg(test)]
+mod tests {
+    use crate::Emulator;
+    use crate::OpCode;
+
+    #[test]
+    fn test_fx33() {
+        let mut emu = Emulator::new();
+        emu.current_opcode = OpCode(0xF533);
+        emu.registers[5] = 105;
+        emu.index_register = 0x200; // unnecessary but oh well...
+        assert_eq!(emu.memory[emu.index_register as usize], 0);
+        assert_eq!(emu.memory[(emu.index_register + 1) as usize], 0);
+        assert_eq!(emu.memory[(emu.index_register + 2) as usize], 0);
+        println!("index_register: {:?}", emu.index_register);
+        let idxr: usize = emu.index_register as usize;
+        println!("memory[ir..ir+3]: {:x?}", &emu.memory[(idxr)..(idxr + 3)]);
+        OpCode::fx33(&mut emu);
+        println!("memory[ir..ir+3]: {:x?}", &emu.memory[(idxr)..(idxr + 3)]);
+        assert_eq!(emu.memory[emu.index_register as usize], 1);
+        assert_eq!(emu.memory[(emu.index_register + 1) as usize], 0);
+        assert_eq!(emu.memory[(emu.index_register + 2) as usize], 5);
+
+        //println!("{:x?}", &emu.memory);
+        //assert_eq!(emu.memory[(emu.index_register + 2) as usize], 8);
+    }
+}
