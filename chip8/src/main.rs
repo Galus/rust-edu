@@ -705,19 +705,45 @@ mod tests {
         emu.current_opcode = OpCode(0xF533);
         emu.registers[5] = 105;
         emu.index_register = 0x200; // unnecessary but oh well...
+
+        // Test init wierd mishaps
         assert_eq!(emu.memory[emu.index_register as usize], 0);
         assert_eq!(emu.memory[(emu.index_register + 1) as usize], 0);
         assert_eq!(emu.memory[(emu.index_register + 2) as usize], 0);
         println!("index_register: {:?}", emu.index_register);
         let idxr: usize = emu.index_register as usize;
         println!("memory[ir..ir+3]: {:x?}", &emu.memory[(idxr)..(idxr + 3)]);
+
+        // Test fx33
         OpCode::fx33(&mut emu);
         println!("memory[ir..ir+3]: {:x?}", &emu.memory[(idxr)..(idxr + 3)]);
+
         assert_eq!(emu.memory[emu.index_register as usize], 1);
         assert_eq!(emu.memory[(emu.index_register + 1) as usize], 0);
         assert_eq!(emu.memory[(emu.index_register + 2) as usize], 5);
 
         //println!("{:x?}", &emu.memory);
         //assert_eq!(emu.memory[(emu.index_register + 2) as usize], 8);
+    }
+
+    #[test]
+    fn test_fx1e() {
+        // init
+        let mut emu = Emulator::new();
+        emu.index_register = 0x200; // unnecessary but oh well...
+
+        // save before
+        emu.current_opcode = OpCode(0xF51E);
+        let old_i = emu.index_register.clone();
+        println!("old_i: {:?}", old_i);
+
+        // test fx1e to see if vX = 0 works
+        // b/c x=5 -> v[5] and b/c all registers are 0'd out now -> 0
+        OpCode::fx1e(&mut emu); // add 5 to i
+        assert_eq!(emu.index_register, old_i);
+
+        emu.registers[5] = 3;
+        OpCode::fx1e(&mut emu); // add 5 to i
+        assert_eq!(emu.index_register, old_i + 3);
     }
 }
