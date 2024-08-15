@@ -26,12 +26,12 @@ impl OpCode {
     /// Sets I = I + X + 1
     /// The interpreter reads values from memory starting at location I into registers V0 through Vx.
     fn fx65(emu: &mut Emulator) {
-        //let num_registers = OpCode::get_x(&emu);
-        //let mut i = emu.index_register; // max 12 bits
-        //for register in 0..num_registers {
-        //    let &(mut reg) = &emu.registers[register as usize];
-        //}
-        todo!()
+        let num_registers = OpCode::get_x(&emu);
+        for x in 0..=num_registers {
+            let load_index = emu.index_register + (x as u16);
+            emu.registers[x as usize] = emu.memory[load_index as usize]
+        }
+        emu.index_register += (num_registers + 1) as u16;
     }
 
     /// Store register vals v0 to vX inclusive in memory starting at address I.
@@ -698,6 +698,44 @@ https://github.com/mattmikolay/chip-8/wiki/CHIP%E2%80%908-Technical-Reference#re
 mod tests {
     use crate::Emulator;
     use crate::OpCode;
+
+    fn test_init_emu() -> Emulator {
+        let mut emu = Emulator::new();
+        // random registers populated
+        emu.registers[0] = 105;
+        emu.registers[1] = 5;
+        emu.registers[2] = 14;
+        emu.registers[7] = 33;
+        emu.registers[12] = 0x11;
+        emu.index_register = 0x200;
+
+        // create some fake memory
+        emu.memory[0x200] = 1;
+        emu.memory[0x201] = 2;
+        emu.memory[0x202] = 3;
+        emu.memory[0x203] = 4;
+        emu.memory[0x204] = 5;
+        emu
+    }
+
+    #[test]
+    fn test_fx65() {
+        let mut emu = test_init_emu();
+        emu.current_opcode = OpCode(0xF533);
+
+        // setting up data to check for out of bounds bugs
+        (emu.memory[0x206], emu.registers[6]) = (0xDE, 0xAD);
+
+        OpCode::fx65(&mut emu);
+        // our x was 5, v0..vx needs to get set with I..I+x
+        assert_eq!(emu.memory[0x200], emu.registers[0]);
+        assert_eq!(emu.memory[0x201], emu.registers[1]);
+        assert_eq!(emu.memory[0x202], emu.registers[2]);
+        assert_eq!(emu.memory[0x203], emu.registers[3]);
+        assert_eq!(emu.memory[0x204], emu.registers[4]);
+        assert_eq!(emu.memory[0x205], emu.registers[5]);
+        assert_ne!(emu.memory[0x206], emu.registers[6]);
+    }
 
     #[test]
     fn test_fx33() {
