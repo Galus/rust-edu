@@ -19,40 +19,9 @@
 use std::fs;
 
 /// https://github.com/mattmikolay/chip-8/wiki/CHIP%E2%80%908-Instruction-Set
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 struct OpCode(u16);
 impl OpCode {
-    //    EXEC    = 0x0FFF,
-    //    CLEAR   = 0x00E0,
-    //    //RETURN  = 0x00EE,
-    //    //JMP     = 0x1FFF,
-    //    //EXECSR  = 0x2FFF,
-    //    //SKIPEQ  = 0x3FFF,
-    //    //SKIPNE  = 0x4FFF,
-    //    //SKIPRE  = 0x5FF0,
-    //    //LOAD    = 0x6FFF,
-    //    //ADD     = 0x7FFF,
-    //    //LOADR   = 0x8FF0,
-    //    //OR      = 0x8FF1,
-    //    //AND     = 0x8FF2,
-    //    //XOR     = 0x8FF3,
-    //    //ADDC    = 0x8FF4,
-    //    //SUBC    = 0x8FF5,
-    //    //RSHIFT  = 0x8FF6, // Right shift
-    //    //SUB     = 0x8FF7,
-    //    //LSHIFT  = 0x8FFE,
-    //    //SKIPNE  = 0x9FF0,
-    //    //STORE   = 0xAFFF, // in register I
-    //    //JMP     = 0xBFFF,
-    //    //RAND    = 0xCFFF,
-    //    //DRAW    = 0xDFFF,
-    //    //SKIPKEY = 0xEF9E,
-    //    //SKIPNKEY = 0xEFA1,
-    //    //LDDELAY = 0xFF07,
-    //    //WAITKEY = 0xFF0A,
-    //    //DELAY   = 0xFF15,
-    //    //SOUND   = 0xFF18,
-
     /// Fill registers v0 to vX inclusive.
     /// Sets I = I + X + 1
     /// The interpreter reads values from memory starting at location I into registers V0 through Vx.
@@ -147,130 +116,257 @@ impl OpCode {
 
     /// Set vX to a random number with a mask of NN
     fn cxnn(emu: &mut Emulator) {
-        todo!()
+        let (_, x, n2, n3) = emu.current_opcode.into_tuple(); //opcodes are u16
+        let rng = rand::random::<u8>();
+        let masked_rng = (n2 << 4 | n3) & rng;
+        emu.registers[x as usize] = masked_rng;
     }
 
     /// Jump to address NNN + v0
     fn bnnn(emu: &mut Emulator) {
-        todo!()
+        let (_, n1, n2, n3) = emu.current_opcode.into_tuple(); //opcodes are u16
+        let address = (n1 as u16) << 8 | (n2 as u16) << 4 | n3 as u16;
+        let added_address = emu.registers[0] as u16 + address;
+        emu.index_register = added_address;
     }
 
     /// Store memory address NNN in register I
     fn annn(emu: &mut Emulator) {
-        println!("hue hue hue");
-        todo!()
+        let (_, n1, n2, n3) = emu.current_opcode.into_tuple(); //opcodes are u16
+        let address = (n1 as u16) << 8 | (n2 as u16) << 4 | n3 as u16;
+        emu.index_register = address;
     }
 
     /// Skip the following instruction if the value of register vX is not equal to the value of
     /// register vY.
     fn _9xy0(emu: &mut Emulator) {
-        todo!()
+        let x = OpCode::get_x(emu);
+        let y = OpCode::get_y(emu);
+        let vx = emu.registers[x as usize];
+        let vy = emu.registers[y as usize];
+        if vx != vy {
+            emu.program_counter += 2; // maybe +1 ?
+        }
     }
 
     /// Store the value of register vY shifted left one bit in register vX
     /// Set register vF to the most significant bit prior to the shift
     /// vY is unchanged
     fn _8xye(emu: &mut Emulator) {
-        todo!()
+        let x = OpCode::get_x(emu);
+        let y = OpCode::get_y(emu);
+        let vy = emu.registers[y as usize];
+        let msb_vy = (vy & 0b10000000) >> 7;
+        emu.registers[0xF as usize] = msb_vy;
+        let shifted_vy = vy << 1;
+        emu.registers[x as usize] = shifted_vy
     }
 
     /// Set register VX to the value of VY minus VX
     /// Set VF to 00 if a borrow occurs
     /// Set VF to 01 if a borrow does not occur
     fn _8xy7(emu: &mut Emulator) {
-        todo!()
+        let x = OpCode::get_x(emu);
+        let y = OpCode::get_y(emu);
+        let vx = emu.registers[x as usize];
+        let vy = emu.registers[y as usize];
+        let (diff, borrow) = {
+            let this = vy;
+            let rhs = vx;
+            let borrow = false;
+            let (a, b) = this.overflowing_sub(rhs);
+            let (c, d) = a.overflowing_sub(borrow as u8);
+            (c, b || d)
+        };
+        emu.registers[x as usize] = diff;
+        if borrow {
+            emu.registers[0xF as usize] = 0x00;
+        } else {
+            emu.registers[0xF as usize] = 0x01;
+        }
     }
 
     /// Store the value of register VY shifted right one bit in register VX¹
     /// Set register VF to the least significant bit prior to the shift
     /// VY is unchanged
     fn _8xy6(emu: &mut Emulator) {
-        todo!()
+        let x = OpCode::get_x(emu);
+        let y = OpCode::get_y(emu);
+        let vy = emu.registers[y as usize];
+        let lsb_vy = vy & 0b00000001;
+        emu.registers[0xF as usize] = lsb_vy;
+        let shifted_vy = vy >> 1;
+        emu.registers[x as usize] = shifted_vy
     }
 
     /// Subtract the value of register VY from register VX
     /// Set VF to 00 if a borrow occurs
     /// Set VF to 01 if a borrow does not occur
     fn _8xy5(emu: &mut Emulator) {
-        todo!()
+        let x = OpCode::get_x(emu);
+        let y = OpCode::get_y(emu);
+        let vx = emu.registers[x as usize];
+        let vy = emu.registers[y as usize];
+        let (diff, borrow) = {
+            let this = vx;
+            let rhs = vy;
+            let borrow = false;
+            let (a, b) = this.overflowing_sub(rhs);
+            let (c, d) = a.overflowing_sub(borrow as u8);
+            (c, b || d)
+        };
+        emu.registers[x as usize] = diff;
+        if borrow {
+            emu.registers[0xF as usize] = 0x00;
+        } else {
+            emu.registers[0xF as usize] = 0x01;
+        }
     }
 
     /// Add the value of register VY to register VX
     /// Set VF to 01 if a carry occurs
     /// Set VF to 00 if a carry does not occur
+    //#[feature(bigint_helper_methods)]
     fn _8xy4(emu: &mut Emulator) {
-        todo!()
+        let x = OpCode::get_x(emu);
+        let y = OpCode::get_y(emu);
+        let vx = emu.registers[x as usize];
+        let vy = emu.registers[y as usize];
+        let (sum, carry) = {
+            let this = vx;
+            let rhs = vy;
+            let carry = false;
+            let (a, b) = this.overflowing_add(rhs);
+            let (c, d) = a.overflowing_add(carry as u8);
+            (c, b || d)
+        };
+        emu.registers[x as usize] = sum;
+        emu.registers[0xF as usize] = carry as u8;
     }
+
+    /// 11 + 11 =>  3 + 3 = 6 = 110 , 111 + 111 = 7+7 = 14 = 1110 , overflow means lsb of larger
+    ///    type
 
     /// Set vX to vX XOR vY
     fn _8xy3(emu: &mut Emulator) {
-        todo!()
+        let x = OpCode::get_x(emu);
+        let y = OpCode::get_y(emu);
+        let vx = emu.registers[x as usize];
+        let vy = emu.registers[y as usize];
+        emu.registers[x as usize] = vx ^ vy;
     }
 
     /// Set vX to vX AND vY
     fn _8xy2(emu: &mut Emulator) {
-        todo!()
+        let x = OpCode::get_x(emu);
+        let y = OpCode::get_y(emu);
+        let vx = emu.registers[x as usize];
+        let vy = emu.registers[y as usize];
+        emu.registers[x as usize] = vx & vy;
     }
 
     /// Set vX to vX OR vY
     fn _8xy1(emu: &mut Emulator) {
-        todo!()
+        let x = OpCode::get_x(emu);
+        let y = OpCode::get_y(emu);
+        let vx = emu.registers[x as usize];
+        let vy = emu.registers[y as usize];
+        emu.registers[x as usize] = vx | vy;
     }
 
     /// Store the value of register vY in register vX
     fn _8xy0(emu: &mut Emulator) {
-        todo!()
+        let x = OpCode::get_x(emu);
+        let y = OpCode::get_y(emu);
+        let vy = emu.registers[y as usize];
+        emu.registers[x as usize] = vy;
     }
 
     /// Add the value NN to register vX
     fn _7xnn(emu: &mut Emulator) {
-        todo!()
+        let (_, x, n2, n3) = emu.current_opcode.into_tuple(); //opcodes are u16
+        let value = (n2 as u8) << 4 | n3 as u8;
+        let temp = emu.registers[x as usize] + value;
+        emu.registers[x as usize] = temp;
     }
 
     /// Store the number NN in register vX
     fn _6xnn(emu: &mut Emulator) {
-        todo!()
+        let (_, x, n2, n3) = emu.current_opcode.into_tuple(); //opcodes are u16
+        let value = (n2 as u8) << 4 | n3 as u8;
+        emu.registers[x as usize] = value;
     }
 
     /// Skip the following instruction if the value of register vX is equal to the value of
     /// register vY.
     fn _5xy0(emu: &mut Emulator) {
-        todo!()
+        let x = OpCode::get_x(emu);
+        let y = OpCode::get_y(emu);
+        let vx = emu.registers[x as usize];
+        let vy = emu.registers[y as usize];
+        if vx == vy {
+            emu.index_register += 1;
+        }
     }
 
     /// Skip the following instruction if the value of register vX is NOT equal to NN
     fn _4xnn(emu: &mut Emulator) {
-        todo!()
+        let (_, x, n2, n3) = emu.current_opcode.into_tuple(); //opcodes are u16
+        let value = (n2 as u8) << 4 | n3 as u8;
+        let vx = emu.registers[x as usize];
+        if vx != value {
+            // Not sure if I should increment program counter by two or increment index_register ?
+            // who knows, future galus
+            emu.index_register += 1;
+        }
     }
 
     /// Skip the following instruction if the value of register vX is equal to NN
     fn _3xnn(emu: &mut Emulator) {
-        todo!()
+        let (_, x, n2, n3) = emu.current_opcode.into_tuple(); //opcodes are u16
+        let value = (n2 as u8) << 4 | n3 as u8;
+        let vx = emu.registers[x as usize];
+        if vx == value {
+            // Not sure if I should increment program counter by two or increment index_register ?
+            // who knows, future galus
+            emu.index_register += 1;
+        }
     }
 
     /// Execute subroutine starting at address NNN
     fn _2nnn(emu: &mut Emulator) {
-        todo!()
+        let (_, n1, n2, n3) = emu.current_opcode.into_tuple(); //opcodes are u16
+        let address = (n1 as u16) << 8 | (n2 as u16) << 4 | n3 as u16;
+        emu.program_counter = address;
     }
 
     /// Jump to address NNN
     fn _1nnn(emu: &mut Emulator) {
-        todo!()
+        let (_, n1, n2, n3) = emu.current_opcode.into_tuple(); //opcodes are u16
+        let address = (n1 as u16) << 8 | (n2 as u16) << 4 | n3 as u16;
+        emu.program_counter = address;
     }
 
     /// Execute machine language subroutine at address NNN
     fn _0nnn(emu: &mut Emulator) {
-        todo!()
+        let (_, n1, n2, n3) = emu.current_opcode.into_tuple(); //opcodes are u16
+        let address = (n1 as u16) << 8 | (n2 as u16) << 4 | n3 as u16;
+        println!("address d{:?}, x{:x?}", address, address);
+        // Figure out if this NNN is BCD'd or if its the bits sequentially
+        // where 0000 1111     0000 1011     0000 0111 implies -> 1111 1011 0111
+        //              15            11             6         ->    E    B    6
+        // otherwise BCD wouldnt allow for 1111, as 9 is the highest bcd.
     }
 
     /// Clear the screen
-    fn _00e0(emu: &Emulator) {
+    fn _00e0(emu: &mut Emulator) {
+        emu.screen = [false; 64 * 32];
         todo!()
     }
 
     /// Return from a subroutine
     fn _00ee(emu: &Emulator) {
-        todo!()
+        return;
     }
 
     /// Returns current opcodes 2nd nibble
@@ -283,16 +379,13 @@ impl OpCode {
 
     /// Returns current opcodes 3rd nibble
     fn get_y(emu: &Emulator) -> u8 {
-        //let op = emu.current_opcode;
-        //let (_, _, y, _) = op.into_tuple();
-        //y
         emu.current_opcode.into_tuple().2
     }
 }
 
 trait Nibbles {
     fn into_tuple(&self) -> (u8, u8, u8, u8);
-    fn into_vec(&self) -> Vec<u8>;
+    // fn into_vec(&self) -> Vec<u8>;
 }
 
 impl Nibbles for OpCode {
@@ -305,15 +398,15 @@ impl Nibbles for OpCode {
         )
     }
 
-    fn into_vec(&self) -> Vec<u8> {
-        let nibbles: Vec<u8> = vec![
-            ((0xF000 & self.0) >> 12) as u8,
-            ((0x0F00 & self.0) >> 8) as u8,
-            ((0x00F0 & self.0) >> 4) as u8,
-            (0x000F & self.0) as u8,
-        ];
-        nibbles
-    }
+    //fn into_vec(&self) -> Vec<u8> {
+    //    let nibbles: Vec<u8> = vec![
+    //        ((0xF000 & self.0) >> 12) as u8,
+    //        ((0x0F00 & self.0) >> 8) as u8,
+    //        ((0x00F0 & self.0) >> 4) as u8,
+    //        (0x000F & self.0) as u8,
+    //    ];
+    //    nibbles
+    //}
 }
 
 #[derive(Debug)]
