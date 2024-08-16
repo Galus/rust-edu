@@ -36,8 +36,14 @@ impl OpCode {
 
     /// Store register vals v0 to vX inclusive in memory starting at address I.
     /// Sets I = I + X + 1
+    /// Basically fx65 but instead of putting memory into registers, puts registers into memory.
     fn fx55(emu: &mut Emulator) {
-        todo!()
+        let num_registers = OpCode::get_x(&emu);
+        for x in 0..=num_registers {
+            let load_index = emu.index_register + (x as u16);
+            emu.memory[load_index as usize] = emu.registers[x as usize];
+        }
+        emu.index_register += (num_registers + 1) as u16;
     }
 
     /// Store BCD of value in vX at addresses I, I+1, I+2
@@ -56,7 +62,9 @@ impl OpCode {
 
     /// Set I to memory address of the sprite data corresponding to hex digit stored in register vX
     fn fx29(emu: &mut Emulator) {
-        todo!()
+        let x = OpCode::get_x(emu);
+        let vx = &emu.registers[x as usize];
+        emu.index_register = *vx as u16;
     }
 
     /// Add the value stored in register vX to register I
@@ -719,9 +727,41 @@ mod tests {
     }
 
     #[test]
+    fn test_fx55() {
+        let mut emu = test_init_emu();
+        emu.current_opcode = OpCode(0xF555);
+
+        // memory should be 1-7 at 0x200-206
+        emu.memory[0x205] = 6;
+        emu.memory[0x206] = 7;
+
+        assert_eq!(emu.memory[0x200], 1);
+        assert_eq!(emu.memory[0x201], 2);
+        assert_eq!(emu.memory[0x202], 3);
+        assert_eq!(emu.memory[0x203], 4);
+        assert_eq!(emu.memory[0x204], 5);
+        assert_eq!(emu.memory[0x205], 6);
+        assert_eq!(emu.memory[0x206], 7);
+
+        OpCode::fx55(&mut emu);
+
+        // our x was 5, v0..vx needs to get set with I..I+x
+        assert_eq!(emu.memory[0x200], emu.registers[0]);
+        assert_eq!(emu.memory[0x201], emu.registers[1]);
+        assert_eq!(emu.memory[0x202], emu.registers[2]);
+        assert_eq!(emu.memory[0x203], emu.registers[3]);
+        assert_eq!(emu.memory[0x204], emu.registers[4]);
+        assert_eq!(emu.memory[0x205], emu.registers[5]);
+
+        // this next memory address shouldnt have been affected by 0xF555 b/c x=5
+        assert_ne!(emu.memory[0x206], emu.registers[6]);
+        assert_eq!(emu.memory[0x206], 7);
+    }
+
+    #[test]
     fn test_fx65() {
         let mut emu = test_init_emu();
-        emu.current_opcode = OpCode(0xF533);
+        emu.current_opcode = OpCode(0xF565);
 
         // setting up data to check for out of bounds bugs
         (emu.memory[0x206], emu.registers[6]) = (0xDE, 0xAD);
