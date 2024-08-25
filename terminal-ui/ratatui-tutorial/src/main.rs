@@ -51,15 +51,40 @@ impl App {
         frame.render_widget(self, frame.area());
     }
 
-    //fn handle_events(&mut self) -> io::Result<()> {
-    //    match event::read()? {
-    //        Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
-    //            self.handle_key_event(key_event)
-    //        }
-    //        _ => {}
-    //    };
-    //    Ok(())
-    //}
+    fn handle_events(&mut self) -> io::Result<()> {
+        // event::read() blocks
+        //  if the app needs to do more than just UI (think Chip8)
+        //  then we can check for pending events with event::poll + timeout (covered in future ch.)
+        match event::read()? {
+            Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
+                self.handle_key_event(key_event)
+            }
+            _ => {}
+        };
+        Ok(())
+    }
+
+    fn handle_key_event(&mut self, key_event: KeyEvent) -> () {
+        match key_event.code {
+            KeyCode::Char('q') => self.exit(),
+            KeyCode::Left => self.decrement_counter(),
+            KeyCode::Right => self.increment_counter(),
+            _ => {}
+        }
+    }
+
+    fn exit(&mut self) {
+        self.exit = true;
+    }
+
+    // galus: There is an overflow bug here left for educational porpoises 🎓 🐬
+    fn increment_counter(&mut self) {
+        self.counter += 1;
+    }
+
+    fn decrement_counter(&mut self) {
+        self.counter -= 1;
+    }
 }
 
 impl Widget for &App {
