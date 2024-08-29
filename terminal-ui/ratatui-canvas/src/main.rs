@@ -12,7 +12,7 @@ use ratatui::{
     text::{Line as TextLine, Text},
     widgets::{
         block::{Position, Title},
-        canvas::{Canvas, Line, Map, MapResolution, Rectangle},
+        canvas::{Canvas, Rectangle},
         Block, Paragraph, Widget,
     },
     Frame,
@@ -46,10 +46,34 @@ pub struct App {
 
 impl Default for App {
     fn default() -> Self {
+        let mut screen = [false; SCREEN_WIDTH * SCREEN_HEIGHT];
+        // Draw a T-Rex head
+        // Main head shape
+        for y in 10..25 {
+            for x in 30..55 {
+                let index = y * SCREEN_WIDTH + x;
+                screen[index] = true;
+            }
+        }
+        // Jaw
+        for y in 20..25 {
+            for x in 45..60 {
+                let index = y * SCREEN_WIDTH + x;
+                screen[index] = true;
+            }
+        }
+        // Eye
+        screen[15 * SCREEN_WIDTH + 45] = true;
+        // Teeth
+        for i in 0..3 {
+            screen[22 * SCREEN_WIDTH + 50 + i * 2] = true;
+        }
+        // Nostril
+        screen[17 * SCREEN_WIDTH + 52] = true;
         Self {
             counter: 0,
             exit: false,
-            screen: [false; SCREEN_WIDTH * SCREEN_HEIGHT],
+            screen,
         }
     }
 }
@@ -104,31 +128,31 @@ impl App {
         Ok(())
     }
 
-    fn content(&self) -> impl Widget {
+    fn content(&self) -> impl Widget + '_ {
+        //vec![true; 99].clone_into(&self.screen[1000]);
+        //self.screen[1000..1099].copy_from_slice(&[true; 99]);
+        let mut screen = self.screen.clone();
+        //screen[1000..1099].copy_from_slice(&[true; 99]);
+
         Canvas::default()
             .block(Block::bordered().title("Canvas"))
-            .x_bounds([-180.0, 180.0])
-            .y_bounds([-90.0, 90.0])
-            .paint(|ctx| {
-                ctx.draw(&Map {
-                    resolution: MapResolution::High,
-                    color: Color::White,
-                });
-                ctx.layer();
-                ctx.draw(&Line {
-                    x1: 0.0,
-                    y1: 10.0,
-                    x2: 10.0,
-                    y2: 10.0,
-                    color: Color::White,
-                });
-                ctx.draw(&Rectangle {
-                    x: 10.0,
-                    y: 20.0,
-                    width: 10.0,
-                    height: 10.0,
-                    color: Color::Red,
-                });
+            .x_bounds([0.0, SCREEN_WIDTH as f64])
+            .y_bounds([0.0, SCREEN_HEIGHT as f64])
+            .paint(move |ctx| {
+                for y in 0..SCREEN_HEIGHT {
+                    for x in 0..SCREEN_WIDTH {
+                        let index = y * SCREEN_WIDTH + x;
+                        if screen[index] {
+                            ctx.draw(&Rectangle {
+                                x: x as f64,
+                                y: y as f64,
+                                width: 1.0,
+                                height: 1.0,
+                                color: Color::White,
+                            })
+                        }
+                    }
+                }
             })
     }
 }
@@ -176,7 +200,6 @@ impl Widget for &App {
         //let inner_area = block.inner(chunks[1]);
         block.render(area, buf);
         paragraph.render(chunks[0], buf);
-        //self.content().render(inner_area, buf);
         self.content().render(chunks[1], buf);
     }
 }
