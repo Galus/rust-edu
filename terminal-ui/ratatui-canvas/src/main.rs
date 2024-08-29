@@ -151,16 +151,19 @@ impl Widget for &App {
             self.counter.to_string().yellow(),
         ])]);
 
-        let paragraph = Paragraph::new(counter_text).centered(); //.block(block.clone());
+        //let paragraph = Paragraph::new(counter_text).centered(); //.block(block.clone());
+        let paragraph = Paragraph::new(counter_text).alignment(Alignment::Center); //.block(block.clone());
 
         let chunks = Layout::default()
             .direction(Direction::Vertical)
-            .constraints([Constraint::Length(0), Constraint::Min(0)])
-            .split(area);
+            .constraints([Constraint::Length(1), Constraint::Min(0)])
+            //.split(area);
+            .split(block.inner(area));
 
-        let inner_area = block.inner(chunks[1]);
-        paragraph.render(chunks[0], buf);
+        //let inner_area = block.inner(chunks[1]);
         block.render(area, buf);
-        self.content().render(inner_area, buf);
+        paragraph.render(chunks[0], buf);
+        //self.content().render(inner_area, buf);
+        self.content().render(chunks[1], buf);
     }
 }
