@@ -6,7 +6,7 @@ use color_eyre::{
 use ratatui::{
     buffer::Buffer,
     crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind},
-    layout::{Alignment, Rect},
+    layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Stylize},
     symbols::border,
     text::{Line as TextLine, Text},
@@ -90,38 +90,9 @@ impl App {
         self.counter -= 1;
         Ok(())
     }
-}
 
-impl Widget for &App {
-    fn render(self, area: Rect, buf: &mut Buffer) {
-        let title = Title::from(" Counter App Ratatui Tutorial <3 from Galus ".bold());
-        let instructions = Title::from(TextLine::from(vec![
-            " Decrement ".into(),
-            "<Left>".blue().bold(),
-            " Increment ".into(),
-            "<Right>".blue().bold(),
-            " Quit ".into(),
-            "<Q> ".blue().bold(),
-        ]));
-
-        let block = Block::bordered()
-            .title(title.alignment(Alignment::Center))
-            .title(
-                instructions
-                    .alignment(Alignment::Center)
-                    .position(Position::Bottom),
-            )
-            .border_set(border::THICK); // galus: All caps made me smile THICC
-
-        let counter_text = Text::from(vec![TextLine::from(vec![
-            "Value: ".into(),
-            self.counter.to_string().yellow(),
-        ])]);
-
-        Paragraph::new(counter_text).centered().block(block);
-        //.render(area, buf);
-
-        let canvas = Canvas::default()
+    fn content(&self) -> impl Widget {
+        Canvas::default()
             .block(Block::bordered().title("Canvas"))
             .x_bounds([-180.0, 180.0])
             .y_bounds([-90.0, 90.0])
@@ -145,7 +116,51 @@ impl Widget for &App {
                     height: 10.0,
                     color: Color::Red,
                 });
-            });
-        canvas.render(area, buf)
+            })
+    }
+}
+
+impl Widget for &App {
+    fn render(self, area: Rect, buf: &mut Buffer) {
+        let title = Title::from(TextLine::from(vec![
+            " Canvas ".bold(),
+            "<3".red().bold(),
+            " Galus ".bold(),
+        ]));
+
+        let instructions = Title::from(TextLine::from(vec![
+            " Left ".into(),
+            "<H> ".blue().bold(),
+            " Right ".into(),
+            "<L> ".blue().bold(),
+            " Quit ".into(),
+            "<Q> ".blue().bold(),
+        ]));
+
+        let block = Block::bordered()
+            .title(title.alignment(Alignment::Right))
+            .title(
+                instructions
+                    .alignment(Alignment::Center)
+                    .position(Position::Bottom),
+            )
+            .border_set(border::THICK); // galus: All caps made me smile THICC
+
+        let counter_text = Text::from(vec![TextLine::from(vec![
+            "Value: ".into(),
+            self.counter.to_string().yellow(),
+        ])]);
+
+        let paragraph = Paragraph::new(counter_text).centered(); //.block(block.clone());
+
+        let chunks = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([Constraint::Length(0), Constraint::Min(0)])
+            .split(area);
+
+        let inner_area = block.inner(chunks[1]);
+        paragraph.render(chunks[0], buf);
+        block.render(area, buf);
+        self.content().render(inner_area, buf);
     }
 }
