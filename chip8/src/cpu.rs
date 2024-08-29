@@ -86,19 +86,19 @@ impl OpCode {
 
     /// Skip the following instruction if the key corresponding to the hex value currently stored
     /// in register vX is NOT pressed
-    fn exa1(emu: &mut Emulator) {
+    fn exa1(_emu: &mut Emulator) {
         todo!()
     }
 
     /// Skip the following instruction if the key corresponding to the hex value currently stored
     /// in register vX is pressed
-    fn ex9e(emu: &mut Emulator) {
+    fn ex9e(_emu: &mut Emulator) {
         todo!()
     }
 
     /// Draw a sprite at position vX, vY with N bytes of sprite data starting at the address
     /// stored in I. Set vF to 01 if any set pixels are changed to unset, and 00 otherwise.
-    fn dxyn(emu: &mut Emulator) {
+    fn dxyn(_emu: &mut Emulator) {
         todo!()
     }
 
@@ -353,7 +353,7 @@ impl OpCode {
     }
 
     /// Return from a subroutine
-    fn _00ee(emu: &Emulator) {
+    fn _00ee(_emu: &Emulator) {
         return;
     }
 
