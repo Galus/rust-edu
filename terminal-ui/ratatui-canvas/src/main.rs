@@ -35,10 +35,23 @@ fn main() -> Result<()> {
     app_result
 }
 
-#[derive(Debug, Default)]
+pub const SCREEN_WIDTH: usize = 64;
+pub const SCREEN_HEIGHT: usize = 32;
+#[derive(Debug)]
 pub struct App {
     counter: u8,
     exit: bool,
+    screen: [bool; SCREEN_WIDTH * SCREEN_HEIGHT],
+}
+
+impl Default for App {
+    fn default() -> Self {
+        Self {
+            counter: 0,
+            exit: false,
+            screen: [false; SCREEN_WIDTH * SCREEN_HEIGHT],
+        }
+    }
 }
 
 impl App {
@@ -147,12 +160,12 @@ impl Widget for &App {
             .border_set(border::THICK); // galus: All caps made me smile THICC
 
         let counter_text = Text::from(vec![TextLine::from(vec![
-            "Value: ".into(),
+            " Value: ".into(),
             self.counter.to_string().yellow(),
+            " ".into(),
         ])]);
 
-        //let paragraph = Paragraph::new(counter_text).centered(); //.block(block.clone());
-        let paragraph = Paragraph::new(counter_text).alignment(Alignment::Center); //.block(block.clone());
+        let paragraph = Paragraph::new(counter_text).alignment(Alignment::Center);
 
         let chunks = Layout::default()
             .direction(Direction::Vertical)
