@@ -19,7 +19,9 @@
 mod cpu;
 use cpu::{fetch_opcode, load_font, load_rom, process, Emulator};
 
-fn main() {
+use color_eyre::Result;
+fn main() -> Result<()> {
+    color_eyre::install()?; // error hooks
     println!("🧨 Initializing emulator");
     let mut emu: Emulator = Emulator::new();
 
@@ -36,7 +38,10 @@ fn main() {
 
     loop {
         let _ = fetch_opcode(&mut emu);
-        let _ = process(&mut emu);
+        if let Err(err) = process(&mut emu) {
+            eprintln!("failed to process.: {}", err);
+            break;
+        }
 
         // Trying to figure out how to have above return a fn ptr
         // display
@@ -47,4 +52,5 @@ fn main() {
 
     //emu.print_memory();
     println!("🍸 Exiting...");
+    Ok(())
 }

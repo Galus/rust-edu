@@ -73,7 +73,7 @@ impl OpCode {
     }
 
     /// Wait for a keypress and store the result in register vX
-    fn fx0a(emu: &mut Emulator) {
+    fn fx0a(_emu: &mut Emulator) {
         todo!()
     }
 
@@ -523,7 +523,8 @@ pub fn fetch_opcode(emu: &mut Emulator) -> Result<bool, bool> {
 }
 
 /// Map the current OpCode to an actual function.
-pub fn process(emu: &mut Emulator) {
+use color_eyre::Result;
+pub fn process(emu: &mut Emulator) -> Result<()> {
     // DECODE and Process
     let op = &emu.current_opcode;
     match op.into_tuple() {
@@ -564,6 +565,7 @@ pub fn process(emu: &mut Emulator) {
         (0xF, _, 6, 5) => OpCode::fx65(emu),
         (a, b, c, d) => println!("Not implemented {:x?}", (a, b, c, d)),
     }
+    Ok(())
 }
 
 #[cfg(test)]
