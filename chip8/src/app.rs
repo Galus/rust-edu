@@ -1,163 +1,59 @@
+// A nice wrapper so we dont have to pollute main with low level stuffs.
+use color_eyre::Result;
+
+use crate::cpu;
+use crate::gpu;
 use crate::tui;
-use color_eyre::{
-    eyre::{bail, WrapErr},
-    Result,
-};
-use ratatui::{
-    buffer::Buffer,
-    crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind},
-    layout::{Alignment, Constraint, Direction, Layout, Rect},
-    style::{Color, Stylize},
-    symbols::{border, Marker},
-    text::{Line as TextLine, Text},
-    widgets::{
-        block::{Position, Title},
-        canvas::{Canvas, Rectangle},
-        Block, Paragraph, Widget,
-    },
-    Frame,
-};
+use cpu::{fetch_opcode, load_font, load_rom, process, Emulator};
 
-pub const SCREEN_WIDTH: usize = 64;
-pub const SCREEN_HEIGHT: usize = 32;
-#[derive(Debug)]
-pub struct App {
-    counter: u8,
-    exit: bool,
-    screen: [bool; SCREEN_WIDTH * SCREEN_HEIGHT],
-}
+/// Creates a terminal and runs a loop that processes instructions, renders to ui, and handles
+/// events
+pub fn run() -> Result<()> {
+    println!("🧨 Initializing emulator");
+    let mut emu: Emulator = Emulator::new();
 
-impl Default for App {
-    fn default() -> Self {
-        let screen = [false; SCREEN_WIDTH * SCREEN_HEIGHT];
-        Self {
-            counter: 0,
-            exit: false,
-            screen,
+    println!("\t🖊️ Loading fonts into emulator...");
+    let _ = load_font(&mut emu);
+
+    let rom_path: &str = "maze.ch8";
+    println!("\t👁️ Reading rom {}...", rom_path);
+    let rom_data: Vec<u8> = std::fs::read(rom_path).unwrap();
+    emu.rom_buffer = rom_data.clone();
+
+    println!("\t🕹️ Loading rom into emulator...");
+    let _ = load_rom(&mut emu); // clears emu.rom_buffer
+
+    println!("\t🖥️ Initializing terminal...");
+    let mut terminal = tui::init()?;
+
+    println!("\t🏃 Running app...");
+
+    //let mut counter = 0;
+    loop {
+        //counter += 1;
+        //println!("Counter {:?}", counter);
+
+        let _ = fetch_opcode(&mut emu);
+        if let Err(err) = process(&mut emu) {
+            eprintln!("failed to process.: {}", err);
+            break;
         }
-    }
-}
+        let _app_result = gpu::App::default().run(&mut terminal);
 
-impl App {
-    pub fn run(&mut self, terminal: &mut tui::Tui) -> Result<()> {
-        while !self.exit {
-            terminal.draw(|frame| self.render_frame(frame))?;
-            self.handle_events().wrap_err("handle events failed")?;
-        }
-        Ok(())
+        // Trying to figure out how to have above return a fn ptr
+        // display
+        // input
+
+        break;
     }
 
-    fn render_frame(&self, frame: &mut Frame) {
-        frame.render_widget(self, frame.area());
+    if let Err(err) = tui::restore() {
+        eprintln!(
+            "failed to restore terminal. Run `reset` or restart your terminal to recover: {}",
+            err
+        );
     }
-
-    fn handle_events(&mut self) -> Result<()> {
-        match event::read()? {
-            Event::Key(key_event) if key_event.kind == KeyEventKind::Press => self
-                .handle_key_event(key_event)
-                .wrap_err_with(|| format!("handling key event failed:\n{key_event:#?}")),
-            _ => Ok(()),
-        }
-    }
-
-    fn handle_key_event(&mut self, key_event: KeyEvent) -> Result<()> {
-        match key_event.code {
-            KeyCode::Char('q') => self.exit(),
-            KeyCode::Left => self.decrement_counter()?,
-            KeyCode::Right => self.increment_counter()?,
-            _ => {}
-        }
-        Ok(())
-    }
-
-    fn exit(&mut self) {
-        self.exit = true;
-    }
-
-    // galus: There is an overflow bug here left for educational porpoises 🎓 🐬
-    fn increment_counter(&mut self) -> Result<()> {
-        self.counter += 1;
-        if self.counter > 2 {
-            bail!("counter overflow");
-        }
-        Ok(())
-    }
-
-    fn decrement_counter(&mut self) -> Result<()> {
-        self.counter -= 1;
-        Ok(())
-    }
-
-    fn content(&self) -> impl Widget + '_ {
-        let mut screen = self.screen.clone();
-        screen[1000..1099].copy_from_slice(&[true; 99]);
-
-        let canvas = Canvas::default()
-            .marker(Marker::Block)
-            .block(Block::bordered().title("Canvas"))
-            .x_bounds([0.0, SCREEN_WIDTH as f64])
-            .y_bounds([0.0, SCREEN_HEIGHT as f64])
-            .paint(move |ctx| {
-                for y in 0..SCREEN_HEIGHT {
-                    for x in 0..SCREEN_WIDTH {
-                        let index = y * SCREEN_WIDTH + x;
-                        if screen[index] {
-                            ctx.draw(&Rectangle {
-                                x: x as f64,
-                                y: y as f64,
-                                width: 1.0,
-                                height: 1.0,
-                                color: Color::Cyan,
-                            })
-                        }
-                    }
-                }
-            });
-        canvas
-    }
-}
-
-impl Widget for &App {
-    fn render(self, area: Rect, buf: &mut Buffer) {
-        let title = Title::from(TextLine::from(vec![
-            " Canvas ".bold(),
-            "<3".red().bold(),
-            " Galus ".bold(),
-        ]));
-
-        let instructions = Title::from(TextLine::from(vec![
-            " Left ".into(),
-            "<H> ".blue().bold(),
-            " Right ".into(),
-            "<L> ".blue().bold(),
-            " Quit ".into(),
-            "<Q> ".blue().bold(),
-        ]));
-
-        let block = Block::bordered()
-            .title(title.alignment(Alignment::Right))
-            .title(
-                instructions
-                    .alignment(Alignment::Center)
-                    .position(Position::Bottom),
-            )
-            .border_set(border::THICK);
-
-        let counter_text = Text::from(vec![TextLine::from(vec![
-            " Value: ".into(),
-            self.counter.to_string().yellow(),
-            " ".into(),
-        ])]);
-
-        let paragraph = Paragraph::new(counter_text).alignment(Alignment::Center);
-
-        let chunks = Layout::default()
-            .direction(Direction::Vertical)
-            .constraints([Constraint::Length(1), Constraint::Min(0)])
-            .split(block.inner(area));
-
-        block.render(area, buf);
-        paragraph.render(chunks[0], buf);
-        self.content().render(chunks[1], buf);
-    }
+    //emu.print_memory();
+    //app_result
+    Ok(())
 }

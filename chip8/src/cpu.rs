@@ -1,3 +1,4 @@
+// Contains the CPUs Registers, OpCodes, and their impls.
 /// https://github.com/mattmikolay/chip-8/wiki/CHIP%E2%80%908-Instruction-Set
 #[derive(Debug, Copy, Clone)]
 pub struct OpCode(u16);
