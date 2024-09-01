@@ -110,13 +110,28 @@ impl Cpu {
 }
 
 #[cfg(test)]
-mod tests {
+mod cputests {
     use crate::emu::cpu::Cpu;
-    use crate::emu::cpu::OpCode;
+    //use crate::emu::cpu::OpCode;
+    use crate::emu::iset::OpCode;
     use crate::emu::Memory;
 
+    /// Creates a dummy cpu with:
+    ///```
+    ///mem.ram[0x200] = 1;
+    ///mem.ram[0x201] = 2;
+    ///mem.ram[0x202] = 3;
+    ///mem.ram[0x203] = 4;
+    ///mem.ram[0x204] = 5;
+    ///cpu.registers[0] = 105;
+    ///cpu.registers[1] = 5;
+    ///cpu.registers[2] = 14;
+    ///cpu.registers[7] = 33;
+    ///cpu.registers[12] = 0x11;
+    ///cpu.index_register = 0x200;
+    ///```
     fn test_init_cpu() -> Cpu {
-        let mut mem = Memory::new();
+        let mut mem = Memory::default();
 
         // create some fake memory
         mem.ram[0x200] = 1;
@@ -142,91 +157,90 @@ mod tests {
     fn test_fx55() {
         let mut cpu = test_init_cpu();
         cpu.current_opcode = OpCode(0xF555);
-        let mem = cpu.mem();
 
         // memory should be 1-7 at 0x200-206
-        mem.data[0x205] = 6;
-        mem.data[0x206] = 7;
+        cpu.memory.ram[0x205] = 6;
+        cpu.memory.ram[0x206] = 7;
 
-        assert_eq!(mem.data[0x200], 1);
-        assert_eq!(mem.data[0x201], 2);
-        assert_eq!(mem.data[0x202], 3);
-        assert_eq!(mem.data[0x203], 4);
-        assert_eq!(mem.data[0x204], 5);
-        assert_eq!(mem.data[0x205], 6);
-        assert_eq!(mem.data[0x206], 7);
+        assert_eq!(cpu.memory.ram[0x200], 1);
+        assert_eq!(cpu.memory.ram[0x201], 2);
+        assert_eq!(cpu.memory.ram[0x202], 3);
+        assert_eq!(cpu.memory.ram[0x203], 4);
+        assert_eq!(cpu.memory.ram[0x204], 5);
+        assert_eq!(cpu.memory.ram[0x205], 6);
+        assert_eq!(cpu.memory.ram[0x206], 7);
 
-        OpCode::fx55(&mut cpu, &mut mem);
+        OpCode::fx55(&mut cpu);
 
         // our x was 5, v0..vx needs to get set with I..I+x
-        assert_eq!(mem.ram[0x200], cpu.registers[0]);
-        assert_eq!(mem.ram[0x201], cpu.registers[1]);
-        assert_eq!(mem.ram[0x202], cpu.registers[2]);
-        assert_eq!(mem.ram[0x203], cpu.registers[3]);
-        assert_eq!(mem.ram[0x204], cpu.registers[4]);
-        assert_eq!(mem.ram[0x205], cpu.registers[5]);
+        assert_eq!(cpu.memory.ram[0x200], cpu.registers[0]);
+        assert_eq!(cpu.memory.ram[0x201], cpu.registers[1]);
+        assert_eq!(cpu.memory.ram[0x202], cpu.registers[2]);
+        assert_eq!(cpu.memory.ram[0x203], cpu.registers[3]);
+        assert_eq!(cpu.memory.ram[0x204], cpu.registers[4]);
+        assert_eq!(cpu.memory.ram[0x205], cpu.registers[5]);
 
-        // this next memory address shouldnt have been affected by 0xF555 b/c x=5
-        assert_ne!(mem.ram[0x206], cpu.registers[6]);
-        assert_eq!(mem.ram[0x206], 7);
+        // this next cpu.memoryory address shouldnt have been affected by 0xF555 b/c x=5
+        assert_ne!(cpu.memory.ram[0x206], cpu.registers[6]);
+        assert_eq!(cpu.memory.ram[0x206], 7);
     }
 
     #[test]
     fn test_fx65() {
-        let (mut cpu, mut mem) = test_init_cpu();
+        let mut cpu = test_init_cpu();
         cpu.current_opcode = OpCode(0xF565);
 
         // setting up data to check for out of bounds bugs
-        (mem.data[0x206], cpu.registers[6]) = (0xDE, 0xAD);
+        (cpu.memory.ram[0x206], cpu.registers[6]) = (0xDE, 0xAD);
 
         OpCode::fx65(&mut cpu);
         // our x was 5, v0..vx needs to get set with I..I+x
-        assert_eq!(mem.data[0x200], cpu.registers[0]);
-        assert_eq!(mem.data[0x201], cpu.registers[1]);
-        assert_eq!(mem.data[0x202], cpu.registers[2]);
-        assert_eq!(mem.data[0x203], cpu.registers[3]);
-        assert_eq!(mem.data[0x204], cpu.registers[4]);
-        assert_eq!(mem.data[0x205], cpu.registers[5]);
-        assert_ne!(mem.data[0x206], cpu.registers[6]);
+        assert_eq!(cpu.memory.ram[0x200], cpu.registers[0]);
+        assert_eq!(cpu.memory.ram[0x201], cpu.registers[1]);
+        assert_eq!(cpu.memory.ram[0x202], cpu.registers[2]);
+        assert_eq!(cpu.memory.ram[0x203], cpu.registers[3]);
+        assert_eq!(cpu.memory.ram[0x204], cpu.registers[4]);
+        assert_eq!(cpu.memory.ram[0x205], cpu.registers[5]);
+        assert_ne!(cpu.memory.ram[0x206], cpu.registers[6]);
     }
 
     #[test]
     fn test_fx33() {
-        let mut emu = Cpu::new();
+        let mut cpu = test_init_cpu();
         cpu.current_opcode = OpCode(0xF533);
         cpu.registers[5] = 105;
         cpu.index_register = 0x200; // unnecessary but oh well...
 
         // Test init wierd mishaps
-        assert_eq!(mem.data[cpu.index_register as usize], 0);
-        assert_eq!(mem.data[(cpu.index_register + 1) as usize], 0);
-        assert_eq!(mem.data[(cpu.index_register + 2) as usize], 0);
+        assert_eq!(cpu.memory.ram[cpu.index_register as usize], 1); // init'd by test_init_cpu
+        assert_eq!(cpu.memory.ram[(cpu.index_register + 1) as usize], 2);
+        assert_eq!(cpu.memory.ram[(cpu.index_register + 2) as usize], 3);
         println!("index_register: {:?}", cpu.index_register);
         let idxr: usize = cpu.index_register as usize;
         println!(
             "memory.data[ir..ir+3]: {:x?}",
-            &mem.data[(idxr)..(idxr + 3)]
+            &cpu.memory.ram[(idxr)..(idxr + 3)]
         );
 
         // Test fx33
-        OpCode::fx33(&mut emu);
+        OpCode::fx33(&mut cpu);
         println!(
             "memory.data[ir..ir+3]: {:x?}",
-            &mem.data[(idxr)..(idxr + 3)]
+            &cpu.memory.ram[(idxr)..(idxr + 3)]
         );
 
-        assert_eq!(mem.data[cpu.index_register as usize], 1);
-        assert_eq!(mem.data[(cpu.index_register + 1) as usize], 0);
-        assert_eq!(mem.data[(cpu.index_register + 2) as usize], 5);
+        assert_eq!(cpu.memory.ram[cpu.index_register as usize], 1);
+        assert_eq!(cpu.memory.ram[(cpu.index_register + 1) as usize], 0);
+        assert_eq!(cpu.memory.ram[(cpu.index_register + 2) as usize], 5);
 
         //println!("{:x?}", &emu.memory);
-        //assert_eq!(mem.data[(cpu.index_register + 2) as usize], 8);
+        //assert_eq!(cpu.memory.ram[(cpu.index_register + 2) as usize], 8);
     }
 
     #[test]
     fn test_fx1e() {
         // init
-        let mut emu = Cpu::new();
+        let mut cpu = test_init_cpu();
         cpu.index_register = 0x200; // unnecessary but oh well...
 
         // save before
@@ -244,13 +258,3 @@ mod tests {
         assert_eq!(cpu.index_register, old_i + 3);
     }
 }
-
-/* Chip8 Memory layout
-0x000-0x04F - Chip 8 interpreter (contains font set in emu)       0 -   79
-0x050-0x0A0 - Used for the built in 4x5 pixel font set (0-F)    080 -  160
-0x200-0xFFF - Program ROM and work RAM                          512 - 4096
-
-0x200-0xE8F
-"final 352 bytes of memory are reserved for “variables and display refresh"
-https://github.com/mattmikolay/chip-8/wiki/CHIP%E2%80%908-Technical-Reference#registers
-*/

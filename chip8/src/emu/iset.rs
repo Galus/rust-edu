@@ -28,6 +28,10 @@ impl OpCode {
     }
 
     /// Store BCD of value in vX at addresses I, I+1, I+2
+    ///
+    /// Stores the binary-coded decimal representation of VX, with the hundreds digit
+    /// in memory at location in I, the tens digit at location I+1,
+    /// and the ones digit at location I+2.[24]
     pub fn fx33(cpu: &mut Cpu) {
         let x = OpCode::get_x(cpu);
         let register = cpu.registers[x as usize];

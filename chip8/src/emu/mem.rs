@@ -1,16 +1,39 @@
 use crate::emu::{Gpu, Keypad, Timer};
 
+/* Chip8 Memory layout
+0x000-0x04F - Chip 8 interpreter (contains font set in emu)       0 -   79
+0x050-0x0A0 - Used for the built in 4x5 pixel font set (0-F)    080 -  160
+0x200-0xFFF - Program ROM and work RAM                          512 - 4096
+
+0x200-0xE8F
+"final 352 bytes of memory are reserved for “variables and display refresh"
+https://github.com/mattmikolay/chip-8/wiki/CHIP%E2%80%908-Technical-Reference#registers
+*/
+
 pub const RAM_SIZE: usize = 4096;
-pub const ROM_SIZE: usize = 4096;
+pub const ROM_MAX_SIZE: usize = RAM_SIZE - 512;
 
 #[derive(Debug)]
 pub struct Memory {
+    pub delay_timer: Timer,
+    pub gpu: Gpu,
+    pub pad: Keypad,
     pub ram: [u8; RAM_SIZE],
     pub rom: Vec<u8>,
-    pub delay_timer: Timer,
     pub sound_timer: Timer,
-    pub pad: Keypad,
-    pub gpu: Gpu,
+}
+
+impl Default for Memory {
+    fn default() -> Self {
+        Self {
+            delay_timer: Timer::new(),
+            gpu: Gpu::new(),
+            pad: Keypad::new(),
+            ram: [0; RAM_SIZE],
+            rom: vec![0; ROM_MAX_SIZE],
+            sound_timer: Timer::new(),
+        }
+    }
 }
 
 impl Memory {
