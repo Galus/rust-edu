@@ -109,211 +109,141 @@ impl Cpu {
     }
 }
 
-//#[cfg(test)]
-//mod tests {
-//    use crate::emu::cpu::Cpu;
-//    use crate::emu::cpu::OpCode;
-//    use crate::emu::Memory;
-//
-//    fn test_init_cpu() -> Cpu {
-//        let mut mem = Memory::new();
-//
-//        // create some fake memory
-//        mem.ram[0x200] = 1;
-//        mem.ram[0x201] = 2;
-//        mem.ram[0x202] = 3;
-//        mem.ram[0x203] = 4;
-//        mem.ram[0x204] = 5;
-//
-//        let mut cpu = Cpu::new(mem);
-//
-//        // random registers populated
-//        cpu.registers[0] = 105;
-//        cpu.registers[1] = 5;
-//        cpu.registers[2] = 14;
-//        cpu.registers[7] = 33;
-//        cpu.registers[12] = 0x11;
-//        cpu.index_register = 0x200;
-//
-//        cpu
-//    }
-//
-//    #[test]
-//    fn test_fx55() {
-//        let mut cpu = test_init_cpu();
-//        cpu.current_opcode = OpCode(0xF555);
-//        let mem = cpu.mem();
-//
-//        // memory should be 1-7 at 0x200-206
-//        mem.data[0x205] = 6;
-//        mem.data[0x206] = 7;
-//
-//        assert_eq!(mem.data[0x200], 1);
-//        assert_eq!(mem.data[0x201], 2);
-//        assert_eq!(mem.data[0x202], 3);
-//        assert_eq!(mem.data[0x203], 4);
-//        assert_eq!(mem.data[0x204], 5);
-//        assert_eq!(mem.data[0x205], 6);
-//        assert_eq!(mem.data[0x206], 7);
-//
-//        OpCode::fx55(&mut cpu, &mut mem);
-//
-//        // our x was 5, v0..vx needs to get set with I..I+x
-//        assert_eq!(mem.ram[0x200], cpu.registers[0]);
-//        assert_eq!(mem.ram[0x201], cpu.registers[1]);
-//        assert_eq!(mem.ram[0x202], cpu.registers[2]);
-//        assert_eq!(mem.ram[0x203], cpu.registers[3]);
-//        assert_eq!(mem.ram[0x204], cpu.registers[4]);
-//        assert_eq!(mem.ram[0x205], cpu.registers[5]);
-//
-//        // this next memory address shouldnt have been affected by 0xF555 b/c x=5
-//        assert_ne!(mem.ram[0x206], cpu.registers[6]);
-//        assert_eq!(mem.ram[0x206], 7);
-//    }
-//
-//    #[test]
-//    fn test_fx65() {
-//        let (mut cpu, mut mem) = test_init_cpu();
-//        cpu.current_opcode = OpCode(0xF565);
-//
-//        // setting up data to check for out of bounds bugs
-//        (mem.data[0x206], cpu.registers[6]) = (0xDE, 0xAD);
-//
-//        OpCode::fx65(&mut cpu);
-//        // our x was 5, v0..vx needs to get set with I..I+x
-//        assert_eq!(mem.data[0x200], cpu.registers[0]);
-//        assert_eq!(mem.data[0x201], cpu.registers[1]);
-//        assert_eq!(mem.data[0x202], cpu.registers[2]);
-//        assert_eq!(mem.data[0x203], cpu.registers[3]);
-//        assert_eq!(mem.data[0x204], cpu.registers[4]);
-//        assert_eq!(mem.data[0x205], cpu.registers[5]);
-//        assert_ne!(mem.data[0x206], cpu.registers[6]);
-//    }
-//
-//    #[test]
-//    fn test_fx33() {
-//        let mut emu = Cpu::new();
-//        cpu.current_opcode = OpCode(0xF533);
-//        cpu.registers[5] = 105;
-//        cpu.index_register = 0x200; // unnecessary but oh well...
-//
-//        // Test init wierd mishaps
-//        assert_eq!(mem.data[cpu.index_register as usize], 0);
-//        assert_eq!(mem.data[(cpu.index_register + 1) as usize], 0);
-//        assert_eq!(mem.data[(cpu.index_register + 2) as usize], 0);
-//        println!("index_register: {:?}", cpu.index_register);
-//        let idxr: usize = cpu.index_register as usize;
-//        println!(
-//            "memory.data[ir..ir+3]: {:x?}",
-//            &mem.data[(idxr)..(idxr + 3)]
-//        );
-//
-//        // Test fx33
-//        OpCode::fx33(&mut emu);
-//        println!(
-//            "memory.data[ir..ir+3]: {:x?}",
-//            &mem.data[(idxr)..(idxr + 3)]
-//        );
-//
-//        assert_eq!(mem.data[cpu.index_register as usize], 1);
-//        assert_eq!(mem.data[(cpu.index_register + 1) as usize], 0);
-//        assert_eq!(mem.data[(cpu.index_register + 2) as usize], 5);
-//
-//        //println!("{:x?}", &emu.memory);
-//        //assert_eq!(mem.data[(cpu.index_register + 2) as usize], 8);
-//    }
-//
-//    #[test]
-//    fn test_fx1e() {
-//        // init
-//        let mut emu = Cpu::new();
-//        cpu.index_register = 0x200; // unnecessary but oh well...
-//
-//        // save before
-//        cpu.current_opcode = OpCode(0xF51E);
-//        let old_i = cpu.index_register.clone();
-//        println!("old_i: {:?}", old_i);
-//
-//        // test fx1e to see if vX = 0 works
-//        // b/c x=5 -> v[5] and b/c all registers are 0'd out now -> 0
-//        OpCode::fx1e(&mut cpu); // add 5 to i
-//        assert_eq!(cpu.index_register, old_i);
-//
-//        cpu.registers[5] = 3;
-//        OpCode::fx1e(&mut cpu); // add 5 to i
-//        assert_eq!(cpu.index_register, old_i + 3);
-//    }
-//}
+#[cfg(test)]
+mod tests {
+    use crate::emu::cpu::Cpu;
+    use crate::emu::cpu::OpCode;
+    use crate::emu::Memory;
 
-/* NOTES
-DXYN	Display	draw(Vx, Vy, N)
-Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels.
-Each row of 8 pixels is read as bit-coded starting from memory location I; I value does not change after the execution of this instruction.
-As described above, VF is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that does not happen.
+    fn test_init_cpu() -> Cpu {
+        let mut mem = Memory::new();
 
-*/
+        // create some fake memory
+        mem.ram[0x200] = 1;
+        mem.ram[0x201] = 2;
+        mem.ram[0x202] = 3;
+        mem.ram[0x203] = 4;
+        mem.ram[0x204] = 5;
 
-// COOL IDEA but im not ready for macros yet
-//macro_rules! opcodes {
-//    ($name: ident <$word: ty> { $($op: ident = $code: expr),+ $(,)? }) => {
-//        #[derive(Debug, Clone, Copy)]
-//        pub enum $name {
-//            $($op = ( ($code & 0xF000) >> 12,$code & 0x000F)),+
-//        }
-//
-//        impl $name {
-//            pub fn to_inst(self) -> $word {
-//                self.into()
-//            }
-//        }
-//
-//        impl Into<$word> for $name {
-//            fn into(self) -> $word {
-//                self as $word
-//            }
-//        }
-//    };
-//}
-//opcodes!(OpCode<u16> {
-//    EXEC    = 0x0FFF,
-//    CLEAR   = 0x00E0,
-//    //RETURN  = 0x00EE,
-//    //JMP     = 0x1FFF,
-//    //EXECSR  = 0x2FFF,
-//    //SKIPEQ  = 0x3FFF,
-//    //SKIPNE  = 0x4FFF,
-//    //SKIPRE  = 0x5FF0,
-//    //LOAD    = 0x6FFF,
-//    //ADD     = 0x7FFF,
-//    //LOADR   = 0x8FF0,
-//    //OR      = 0x8FF1,
-//    //AND     = 0x8FF2,
-//    //XOR     = 0x8FF3,
-//    //ADDC    = 0x8FF4,
-//    //SUBC    = 0x8FF5,
-//    //RSHIFT  = 0x8FF6, // Right shift
-//    //SUB     = 0x8FF7,
-//    //LSHIFT  = 0x8FFE,
-//    //SKIPNE  = 0x9FF0,
-//    //STORE   = 0xAFFF, // in register I
-//    //JMP     = 0xBFFF,
-//    //RAND    = 0xCFFF,
-//    //DRAW    = 0xDFFF,
-//    //SKIPKEY = 0xEF9E,
-//    //SKIPNKEY = 0xEFA1,
-//    //LDDELAY = 0xFF07,
-//    //WAITKEY = 0xFF0A,
-//    //DELAY   = 0xFF15,
-//    //SOUND   = 0xFF18,
-//    //ADDRI   = 0xFF1E,
-//
-//    // 1111 1011 0000 1010
-//    // 1111 1111 0000 1010
-//// xor 0000
-//
-//
-//
-//});
+        let mut cpu = Cpu::new(mem);
+
+        // random registers populated
+        cpu.registers[0] = 105;
+        cpu.registers[1] = 5;
+        cpu.registers[2] = 14;
+        cpu.registers[7] = 33;
+        cpu.registers[12] = 0x11;
+        cpu.index_register = 0x200;
+
+        cpu
+    }
+
+    #[test]
+    fn test_fx55() {
+        let mut cpu = test_init_cpu();
+        cpu.current_opcode = OpCode(0xF555);
+        let mem = cpu.mem();
+
+        // memory should be 1-7 at 0x200-206
+        mem.data[0x205] = 6;
+        mem.data[0x206] = 7;
+
+        assert_eq!(mem.data[0x200], 1);
+        assert_eq!(mem.data[0x201], 2);
+        assert_eq!(mem.data[0x202], 3);
+        assert_eq!(mem.data[0x203], 4);
+        assert_eq!(mem.data[0x204], 5);
+        assert_eq!(mem.data[0x205], 6);
+        assert_eq!(mem.data[0x206], 7);
+
+        OpCode::fx55(&mut cpu, &mut mem);
+
+        // our x was 5, v0..vx needs to get set with I..I+x
+        assert_eq!(mem.ram[0x200], cpu.registers[0]);
+        assert_eq!(mem.ram[0x201], cpu.registers[1]);
+        assert_eq!(mem.ram[0x202], cpu.registers[2]);
+        assert_eq!(mem.ram[0x203], cpu.registers[3]);
+        assert_eq!(mem.ram[0x204], cpu.registers[4]);
+        assert_eq!(mem.ram[0x205], cpu.registers[5]);
+
+        // this next memory address shouldnt have been affected by 0xF555 b/c x=5
+        assert_ne!(mem.ram[0x206], cpu.registers[6]);
+        assert_eq!(mem.ram[0x206], 7);
+    }
+
+    #[test]
+    fn test_fx65() {
+        let (mut cpu, mut mem) = test_init_cpu();
+        cpu.current_opcode = OpCode(0xF565);
+
+        // setting up data to check for out of bounds bugs
+        (mem.data[0x206], cpu.registers[6]) = (0xDE, 0xAD);
+
+        OpCode::fx65(&mut cpu);
+        // our x was 5, v0..vx needs to get set with I..I+x
+        assert_eq!(mem.data[0x200], cpu.registers[0]);
+        assert_eq!(mem.data[0x201], cpu.registers[1]);
+        assert_eq!(mem.data[0x202], cpu.registers[2]);
+        assert_eq!(mem.data[0x203], cpu.registers[3]);
+        assert_eq!(mem.data[0x204], cpu.registers[4]);
+        assert_eq!(mem.data[0x205], cpu.registers[5]);
+        assert_ne!(mem.data[0x206], cpu.registers[6]);
+    }
+
+    #[test]
+    fn test_fx33() {
+        let mut emu = Cpu::new();
+        cpu.current_opcode = OpCode(0xF533);
+        cpu.registers[5] = 105;
+        cpu.index_register = 0x200; // unnecessary but oh well...
+
+        // Test init wierd mishaps
+        assert_eq!(mem.data[cpu.index_register as usize], 0);
+        assert_eq!(mem.data[(cpu.index_register + 1) as usize], 0);
+        assert_eq!(mem.data[(cpu.index_register + 2) as usize], 0);
+        println!("index_register: {:?}", cpu.index_register);
+        let idxr: usize = cpu.index_register as usize;
+        println!(
+            "memory.data[ir..ir+3]: {:x?}",
+            &mem.data[(idxr)..(idxr + 3)]
+        );
+
+        // Test fx33
+        OpCode::fx33(&mut emu);
+        println!(
+            "memory.data[ir..ir+3]: {:x?}",
+            &mem.data[(idxr)..(idxr + 3)]
+        );
+
+        assert_eq!(mem.data[cpu.index_register as usize], 1);
+        assert_eq!(mem.data[(cpu.index_register + 1) as usize], 0);
+        assert_eq!(mem.data[(cpu.index_register + 2) as usize], 5);
+
+        //println!("{:x?}", &emu.memory);
+        //assert_eq!(mem.data[(cpu.index_register + 2) as usize], 8);
+    }
+
+    #[test]
+    fn test_fx1e() {
+        // init
+        let mut emu = Cpu::new();
+        cpu.index_register = 0x200; // unnecessary but oh well...
+
+        // save before
+        cpu.current_opcode = OpCode(0xF51E);
+        let old_i = cpu.index_register.clone();
+        println!("old_i: {:?}", old_i);
+
+        // test fx1e to see if vX = 0 works
+        // b/c x=5 -> v[5] and b/c all registers are 0'd out now -> 0
+        OpCode::fx1e(&mut cpu); // add 5 to i
+        assert_eq!(cpu.index_register, old_i);
+
+        cpu.registers[5] = 3;
+        OpCode::fx1e(&mut cpu); // add 5 to i
+        assert_eq!(cpu.index_register, old_i + 3);
+    }
+}
 
 /* Chip8 Memory layout
 0x000-0x04F - Chip 8 interpreter (contains font set in emu)       0 -   79

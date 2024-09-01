@@ -19,7 +19,7 @@ fn main() -> Result<()> {
     let mut emu: Emulator = Emulator::new();
 
     println!("\t{} Loading fonts into emulator...", EMOJIS[1]);
-    emu.load_font();
+    let _ = emu.load_font();
 
     let rom_path: &str = "./roms/maze.ch8";
     println!("\t{} Reading rom {}...", EMOJIS[2], rom_path);
@@ -27,7 +27,7 @@ fn main() -> Result<()> {
     emu.cpu.memory.rom = rom_data;
 
     println!("\t{} Loading rom into emulator...", EMOJIS[3]);
-    emu.load_rom(); // clears emu.rom_buffer
+    let _ = emu.load_rom(); // clears emu.rom_buffer
 
     println!("\t{} Initializing terminal...", EMOJIS[4]);
     let mut terminal = emu.cpu.memory.gpu.init()?;
