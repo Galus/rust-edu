@@ -1,14 +1,52 @@
-1. `src/main.rs`: This will be the entry point of your emulator, containing the main loop and initialization code.
+# CHIP-8 Emulator
 
-2. `src/memory.rs`: To handle memory-related operations and the memory layout you described in the comments at the end of the file.
+This is a CHIP-8 emulator implemented in Rust. CHIP-8 is an interpreted programming language developed in the 1970s, primarily used on 8-bit microcomputers and for creating simple video games.
 
-3. `src/display.rs`: For managing the screen and drawing operations.
+## Project Structure
 
-4. `src/input.rs`: To handle keypad input.
+The project is organized into the following modules:
 
-5. `src/sound.rs`: For managing sound-related functionality.
+1. `src/main.rs`: The entry point of the emulator, containing the main loop and initialization code.
+2. `src/memory.rs`: Handles memory-related operations and the memory layout.
+3. `src/display.rs`: Manages the screen and drawing operations.
+4. `src/input.rs`: Handles keypad input.
+5. `src/sound.rs`: Manages sound-related functionality.
+6. `src/timer.rs`: Handles the delay and sound timers.
 
-6. `src/timer.rs`: To handle the delay and sound timers.
+## Features
 
-By separating these components into different files, you'll improve the organization and maintainability of your project. You can then use Rust's module system to bring these components together in your `main.rs` file.
+- Accurate emulation of CHIP-8 instructions
+- Display output
+- Keyboard input
+- Sound support
+- Configurable clock speed
 
+## Building and Running
+
+To build and run the emulator, make sure you have Rust installed on your system. Then, follow these steps:
+
+1. Clone the repository:
+   ```
+   git clone https://github.com/yourusername/chip8-emulator.git
+   cd chip8-emulator
+   ```
+
+2. Build the project:
+   ```
+   cargo build --release
+   ```
+
+3. Run the emulator:
+   ```
+   cargo run --release -- path/to/rom.ch8
+   ```
+
+Replace `path/to/rom.ch8` with the path to a CHIP-8 ROM file you want to run.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
