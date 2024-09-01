@@ -6,12 +6,12 @@ This is a CHIP-8 emulator implemented in Rust. CHIP-8 is an interpreted programm
 
 The project is organized into the following modules:
 
-1. `src/main.rs`: The entry point of the emulator, containing the main loop and initialization code.
-2. `src/memory.rs`: Handles memory-related operations and the memory layout.
-3. `src/display.rs`: Manages the screen and drawing operations.
-4. `src/input.rs`: Handles keypad input.
-5. `src/sound.rs`: Manages sound-related functionality.
-6. `src/timer.rs`: Handles the delay and sound timers.
+- chip8
+    - emu
+        - cpu
+            - gpu
+            - memory
+
 
 ## Features
 
@@ -27,8 +27,8 @@ To build and run the emulator, make sure you have Rust installed on your system.
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/chip8-emulator.git
-   cd chip8-emulator
+   git clone https://github.com/galus/rust-edu.git
+   cd rust-edu/chip8
    ```
 
 2. Build the project:
