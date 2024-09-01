@@ -1,14 +1,31 @@
+use crate::emu::{Gpu, Keypad, Timer};
+
+pub const RAM_SIZE: usize = 4096;
+pub const ROM_SIZE: usize = 4096;
+
 #[derive(Debug)]
 pub struct Memory {
-    pub data: [u8; 4096],
+    pub ram: [u8; RAM_SIZE],
+    pub rom: Vec<u8>,
+    pub delay_timer: Timer,
+    pub sound_timer: Timer,
+    pub pad: Keypad,
+    pub gpu: Gpu,
 }
 
 impl Memory {
-    pub fn new() -> Self {
-        Self { data: [0; 4096] }
+    pub fn new(dt: Timer, gpu: Gpu, pad: Keypad, rom: Vec<u8>, st: Timer) -> Self {
+        Self {
+            delay_timer: dt,
+            ram: [0; 4096],
+            gpu,
+            pad,
+            rom,
+            sound_timer: st,
+        }
     }
     pub fn print_memory(&self) {
-        for (i, byte) in self.data.iter().enumerate() {
+        for (i, byte) in self.ram.iter().enumerate() {
             if i % 16 == 0 {
                 println!("\n{:04X}: ", i);
             }

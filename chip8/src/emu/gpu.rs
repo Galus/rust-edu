@@ -33,21 +33,21 @@ pub const SCREEN_WIDTH: usize = 64;
 pub const SCREEN_HEIGHT: usize = 32;
 #[derive(Debug)]
 pub struct Gpu {
-    counter: u8,
-    exit: bool,
+    pub counter: u8,
+    pub exit: bool,
     pub screen: [bool; SCREEN_WIDTH * SCREEN_HEIGHT],
 }
 
-impl Default for Gpu {
-    fn default() -> Self {
-        let screen = [false; SCREEN_WIDTH * SCREEN_HEIGHT];
-        Self {
-            counter: 0,
-            exit: false,
-            screen,
-        }
-    }
-}
+//impl Default for Gpu {
+//    fn default() -> Self {
+//        let screen = [false; SCREEN_WIDTH * SCREEN_HEIGHT];
+//        Self {
+//            counter: 0,
+//            exit: false,
+//            screen,
+//        }
+//    }
+//}
 
 impl Gpu {
     pub fn new() -> Self {
@@ -152,7 +152,7 @@ impl Gpu {
     }
 
     /// Restore the terminal to its original state
-    pub fn restore() -> io::Result<()> {
+    pub fn restore(&self) -> io::Result<()> {
         execute!(stdout(), LeaveAlternateScreen)?;
         disable_raw_mode()?;
         Ok(())
@@ -161,7 +161,7 @@ impl Gpu {
     fn set_panic_hook() {
         let hook = std::panic::take_hook();
         std::panic::set_hook(Box::new(move |panic_info| {
-            let _ = Self::restore();
+            let _ = Self::restore(&Self::new());
             hook(panic_info);
         }))
     }
