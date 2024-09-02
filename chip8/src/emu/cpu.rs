@@ -259,7 +259,7 @@ mod cputests {
     }
 
     #[test]
-    fn test_fx0a() {
+    fn test_fx0a_test() {
         let mut cpu = test_init_cpu();
         let old = cpu.registers[7].clone();
         cpu.current_opcode = OpCode(0xF70A);
@@ -270,4 +270,21 @@ mod cputests {
         assert_eq!(13, new);
         assert_ne!(old, new);
     }
+
+    //#[test]
+    //fn test_fx0a() {
+    //    let mut cpu = test_init_cpu();
+    //    let old = cpu.registers[7].clone();
+    //    cpu.current_opcode = OpCode(0xF70A);
+    //
+    //    //if poll(Duration::from_millis(100))? {
+    //    OpCode::fx0a(&mut cpu);
+    //    let new = cpu.registers[7].clone();
+    //    // This opcode fx0a_test should have mutated our '7' register b/c fx0a -> x = 7 => f70a
+    //    assert_eq!(13, new);
+    //    assert_ne!(old, new);
+    //    //} else {
+    //    //    println!("hubbababa");
+    //    //}
+    //}
 }

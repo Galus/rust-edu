@@ -79,27 +79,22 @@ impl OpCode {
 
     /// Wait for a keypress and store the result in register vX
     pub fn fx0a(cpu: &mut Cpu) {
+        // use ratatui::crossterm::terminal::{disable_raw_mode, enable_raw_mode};
         let x = OpCode::get_x(cpu);
-        cpu.registers[x as usize] = 0000000000000000000000000000000000000000000000;
-        let _whatisit = cpu.memory.gpu.handle_events();
-        todo!();
+        //let _ = enable_raw_mode();
+        let pressed_value = cpu.memory.gpu.handle_events().unwrap();
+        //let _ = disable_raw_mode();
+        cpu.registers[x as usize] = pressed_value;
     }
 
     /// fx0a but presses the 'x' key
     pub fn fx0a_test(cpu: &mut Cpu) {
         let x = OpCode::get_x(cpu);
 
-        use ratatui::crossterm::event::{
-            KeyCode, KeyEvent, KeyEventKind, KeyEventState, KeyModifiers,
-        };
-        let mockKeyEvent = KeyEvent {
-            code: KeyCode::Char('x'),
-            modifiers: KeyModifiers::empty(),
-            kind: KeyEventKind::Press,
-            state: KeyEventState::empty(),
-        };
+        use ratatui::crossterm::event::KeyCode;
 
-        let whatisit = cpu.memory.gpu.handle_key_event(mockKeyEvent).unwrap();
+        let k = KeyCode::Char('x').into();
+        let whatisit = cpu.memory.gpu.handle_key_event(k).unwrap();
         cpu.registers[x as usize] = whatisit;
         assert_eq!(13, whatisit); // make sure our [1-4,q-r,a-f,z-v] maps to [0 - 16]
     }
@@ -111,16 +106,30 @@ impl OpCode {
         cpu.registers[x as usize] = delay_timer;
     }
 
-    /// Skip the following instruction if the key corresponding to the hex value currently stored
-    /// in register vX is NOT pressed
-    pub fn exa1(_cpu: &mut Cpu) {
-        todo!()
+    /// Skip the following instruction if the key corresponding to
+    /// the hex value currently stored in register vX is NOT pressed
+    pub fn exa1(cpu: &mut Cpu) {
+        let x = OpCode::get_x(cpu);
+        let vx = cpu.registers[x as usize];
+        let pressed_value = cpu.memory.gpu.handle_events().unwrap();
+        if pressed_value != vx {
+            // skip instruction
+        } else {
+            // dont skip
+        }
     }
 
-    /// Skip the following instruction if the key corresponding to the hex value currently stored
-    /// in register vX is pressed
-    pub fn ex9e(_cpu: &mut Cpu) {
-        todo!()
+    /// Skip the following instruction if the key corresponding to
+    /// the hex value currently stored in register vX is pressed
+    pub fn ex9e(cpu: &mut Cpu) {
+        let x = OpCode::get_x(cpu);
+        let vx = cpu.registers[x as usize];
+        let pressed_value = cpu.memory.gpu.handle_events().unwrap();
+        if pressed_value == vx {
+            // skip instruction
+        } else {
+            // dont skip
+        }
     }
 
     /// Draw a sprite at position vX, vY with N bytes of sprite data starting at the address
