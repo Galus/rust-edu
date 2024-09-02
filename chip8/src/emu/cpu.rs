@@ -257,4 +257,17 @@ mod cputests {
         OpCode::fx1e(&mut cpu); // add 5 to i
         assert_eq!(cpu.index_register, old_i + 3);
     }
+
+    #[test]
+    fn test_fx0a() {
+        let mut cpu = test_init_cpu();
+        let old = cpu.registers[7].clone();
+        cpu.current_opcode = OpCode(0xF70A);
+        // presses x, == 13 in our keymap
+        OpCode::fx0a_test(&mut cpu);
+        // This opcode fx0a_test should have mutated our '7' register b/c fx0a -> x = 7 => f70a
+        let new = cpu.registers[7].clone();
+        assert_eq!(13, new);
+        assert_ne!(old, new);
+    }
 }

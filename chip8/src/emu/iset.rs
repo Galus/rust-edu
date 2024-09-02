@@ -78,8 +78,30 @@ impl OpCode {
     }
 
     /// Wait for a keypress and store the result in register vX
-    pub fn fx0a(_cpu: &mut Cpu) {
-        todo!()
+    pub fn fx0a(cpu: &mut Cpu) {
+        let x = OpCode::get_x(cpu);
+        cpu.registers[x as usize] = 0000000000000000000000000000000000000000000000;
+        let _whatisit = cpu.memory.gpu.handle_events();
+        todo!();
+    }
+
+    /// fx0a but presses the 'x' key
+    pub fn fx0a_test(cpu: &mut Cpu) {
+        let x = OpCode::get_x(cpu);
+
+        use ratatui::crossterm::event::{
+            KeyCode, KeyEvent, KeyEventKind, KeyEventState, KeyModifiers,
+        };
+        let mockKeyEvent = KeyEvent {
+            code: KeyCode::Char('x'),
+            modifiers: KeyModifiers::empty(),
+            kind: KeyEventKind::Press,
+            state: KeyEventState::empty(),
+        };
+
+        let whatisit = cpu.memory.gpu.handle_key_event(mockKeyEvent).unwrap();
+        cpu.registers[x as usize] = whatisit;
+        assert_eq!(13, whatisit); // make sure our [1-4,q-r,a-f,z-v] maps to [0 - 16]
     }
 
     /// Store the current value of the delay timer in register vX

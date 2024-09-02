@@ -1,7 +1,7 @@
 // Contains the graphics processing.
 use color_eyre::{
     eyre::{bail, WrapErr},
-    Result,
+    Report, Result,
 };
 
 use ratatui::{
@@ -75,23 +75,51 @@ impl Gpu {
         frame.render_widget(self, frame.area());
     }
 
-    fn handle_events(&mut self) -> Result<()> {
+    pub fn handle_events(&mut self) -> Result<u8> {
+        //color_eyre::install()?; // error hooks
         match event::read()? {
             Event::Key(key_event) if key_event.kind == KeyEventKind::Press => self
                 .handle_key_event(key_event)
                 .wrap_err_with(|| format!("handling key event failed:\n{key_event:#?}")),
-            _ => Ok(()),
+            _ => Ok(255),
         }
     }
 
-    fn handle_key_event(&mut self, key_event: KeyEvent) -> Result<()> {
+    pub fn handle_key_event(&mut self, key_event: KeyEvent) -> Result<u8> {
         match key_event.code {
-            KeyCode::Char('q') => self.exit(),
-            KeyCode::Left => self.decrement_counter()?,
-            KeyCode::Right => self.increment_counter()?,
-            _ => {}
+            KeyCode::Char('0') => {
+                self.exit();
+                return Ok(255);
+            }
+            KeyCode::Left => {
+                self.decrement_counter()?;
+                return Ok(254);
+            }
+            KeyCode::Right => {
+                self.increment_counter()?;
+                return Ok(253);
+            }
+
+            // Chip8 valid 16 chars
+            KeyCode::Char('1') => Ok::<u8, Report>(0),
+            KeyCode::Char('2') => Ok(1),
+            KeyCode::Char('3') => Ok(2),
+            KeyCode::Char('4') => Ok(3),
+            KeyCode::Char('q') => Ok(4),
+            KeyCode::Char('w') => Ok(5),
+            KeyCode::Char('e') => Ok(6),
+            KeyCode::Char('r') => Ok(7),
+            KeyCode::Char('a') => Ok(8),
+            KeyCode::Char('s') => Ok(9),
+            KeyCode::Char('d') => Ok(10),
+            KeyCode::Char('f') => Ok(11),
+            KeyCode::Char('z') => Ok(12),
+            KeyCode::Char('x') => Ok(13),
+            KeyCode::Char('c') => Ok(14),
+            KeyCode::Char('v') => Ok(15),
+            _ => Ok(222),
         }
-        Ok(())
+        //Ok(111)
     }
 
     fn exit(&mut self) {
