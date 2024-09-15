@@ -300,6 +300,7 @@ mod cputests {
     #[test]
     fn test_dxyn() {
         let mut cpu = test_init_cpu();
+        //cpu.current_opcode = OpCode(0xF70A);
         let old_vf = cpu.registers[0xF];
         // assert old_vf is not set
         assert_eq!(old_vf, 0);
@@ -316,6 +317,7 @@ mod cputests {
         let offset = W + (W / 2);
         cpu.memory.gpu.screen[offset..(offset + 4)].fill(true);
         cpu.memory.gpu.screen[offset + 7] = true;
+        println!("Second row filled with '1111 0001' somewhere...");
         println!("{:x?}", cpu.memory.gpu.screen.map(|bool| bool as u32));
         assert_eq!(
             cpu.memory.gpu.screen[offset..(offset + 8)],
@@ -342,7 +344,42 @@ mod cputests {
         cpu.memory.ram[cpu.index_register as usize] = pixel_byte1_u8;
         cpu.memory.ram[(cpu.index_register as usize) + 1] = pixel_byte2_u8;
         // This actuall happens to show up as '0xaa' t,f,t,f,t,f,t,f = 1010 1010 = 0xa 0xa
+        println!("ram:");
         println!("{:x?}", cpu.memory.ram.map(|u| u as u8));
+
+        // Lets draw into an unset, blank, area and make sure vF is 0
+        // ...draw at the bottom-right of the screen (64x32) -> 48,30
+        // ...put these in two random registers, register 8 and 10
+        cpu.current_opcode = OpCode(0xD432);
+        const VX: u8 = 48; // max is 64
+        const VY: u8 = 30; // max is 32
+        cpu.registers[4] = VX;
+        cpu.registers[3] = VY;
+        println!("screen (before writing to bottom-right of screen):");
+        println!("{:x?}", cpu.memory.gpu.screen.map(|bool| bool as u8));
+        OpCode::dxyn(&mut cpu);
+        println!("screen (after writing to bottom-right of screen):");
+        println!("{:x?}", cpu.memory.gpu.screen.map(|bool| bool as u8));
+        assert_eq!(cpu.registers[0xF], 0);
+
+        //const X: usize = 8;
+        //cpu.registers[X] = VX;
+        //const Y: usize = 0xa;
+        //cpu.registers[Y] = VY;
+        //
+        //println!("screen:");
+        //println!("{:x?}", cpu.memory.gpu.screen.map(|bool| bool as u8));
+        //
+        //println!("Running the function dxyn()");
+        //OpCode::dxyn(&mut cpu);
+        //
+        //println!("screen:");
+        //println!("{:x?}", cpu.memory.gpu.screen.map(|bool| bool as u8));
+        //
+        //// calculate offset in screen for this
+        //let offset = W.wrapping_mul(VY as usize) + VX as usize;
+        //assert_eq!(cpu.memory.gpu.screen[offset..offset + 8], pixel_byte1);
+        //assert_eq!(cpu.memory.gpu.screen[offset + 8..offset + 16], pixel_byte2);
     }
 
     //#[test]
