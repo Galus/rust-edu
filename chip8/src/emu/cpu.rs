@@ -30,6 +30,30 @@ pub struct Cpu {
     pub keypad: [bool; 16],
     //pub rom_buffer: Vec<u8>, // moved to self.memory.rom
     pub running: bool,
+
+    /// Memory Map:
+    /// +---------------+= 0xFFF (4095) End of Chip-8 RAM
+    /// |               |
+    /// |               |
+    /// |               |
+    /// |               |
+    /// |               |
+    /// | 0x200 to 0xFFF|
+    /// |     Chip-8    |
+    /// | Program / Data|
+    /// |     Space     |
+    /// |               |
+    /// |               |
+    /// |               |
+    /// +- - - - - - - -+= 0x600 (1536) Start of ETI 660 Chip-8 programs
+    /// |               |
+    /// |               |
+    /// |               |
+    /// +---------------+= 0x200 (512) Start of most Chip-8 programs
+    /// | 0x000 to 0x1FF|
+    /// | Reserved for  |
+    /// |  interpreter  |
+    /// +---------------+= 0x000 (0) Start of Chip-8 RAM
     pub memory: Memory,
 }
 
@@ -317,6 +341,7 @@ mod cputests {
         cpu.index_register = 1337;
         cpu.memory.ram[cpu.index_register as usize] = pixel_byte1_u8;
         cpu.memory.ram[(cpu.index_register as usize) + 1] = pixel_byte2_u8;
+        // This actuall happens to show up as '0xaa' t,f,t,f,t,f,t,f = 1010 1010 = 0xa 0xa
         println!("{:x?}", cpu.memory.ram.map(|u| u as u8));
     }
 
