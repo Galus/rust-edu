@@ -200,7 +200,7 @@ impl OpCode {
         let vx = cpu.registers[x as usize];
         let vy = cpu.registers[y as usize];
         if vx != vy {
-            cpu.program_counter += 2; // maybe +1 ?
+            cpu.program_counter += 2;
         }
     }
 
@@ -218,8 +218,9 @@ impl OpCode {
     }
 
     /// Set register VX to the value of VY minus VX
-    /// Set VF to 00 if a borrow occurs
-    /// Set VF to 01 if a borrow does not occur
+    /// ... Vx = Vy - Vx, VF = NOT borrow
+    /// ... Set VF to 00 if a borrow occurs
+    /// ... Set VF to 01 if a borrow does not occur
     pub fn _8xy7(cpu: &mut Cpu) {
         let x = OpCode::get_x(cpu);
         let y = OpCode::get_y(cpu);
@@ -255,8 +256,9 @@ impl OpCode {
     }
 
     /// Subtract the value of register VY from register VX
-    /// Set VF to 00 if a borrow occurs
-    /// Set VF to 01 if a borrow does not occur
+    /// ... Vx = Vx - Vy, set VF = NOT borrow
+    /// ... Set VF to 00 if a borrow occurs
+    /// ... Set VF to 01 if a borrow does not occur
     pub fn _8xy5(cpu: &mut Cpu) {
         let x = OpCode::get_x(cpu);
         let y = OpCode::get_y(cpu);
@@ -296,7 +298,7 @@ impl OpCode {
             (c, b || d)
         };
         cpu.registers[x as usize] = sum;
-        cpu.registers[0xF as usize] = carry as u8;
+        cpu.registers[0xF] = carry as u8;
     }
 
     /// 11 + 11 =>  3 + 3 = 6 = 110 , 111 + 111 = 7+7 = 14 = 1110 , overflow means lsb of larger

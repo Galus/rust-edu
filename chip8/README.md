@@ -25,22 +25,22 @@ inspired my project layout to funnel all the things into the cpu.
 
 ### Instructions Progress
 
-- [ ] 00E0 - CLS
-- [ ] 00EE - RET
-- [ ] 0nnn - SYS addr
-- [ ] 1nnn - JP addr
-- [ ] 2nnn - CALL addr
-- [ ] 3xkk - SE Vx, byte
-- [ ] 4xkk - SNE Vx, byte
-- [ ] 5xy0 - SE Vx, Vy
-- [ ] 6xkk - LD Vx, byte
-- [ ] 7xkk - ADD Vx, byte
-- [ ] 8xy0 - LD Vx, Vy
-- [ ] 8xy1 - OR Vx, Vy
-- [ ] 8xy2 - AND Vx, Vy
-- [ ] 8xy3 - XOR Vx, Vy
-- [ ] 8xy4 - ADD Vx, Vy
-- [ ] 8xy5 - SUB Vx, Vy
+- [X] 00E0 - CLS
+- [X] 00EE - RET
+- [X] 0nnn - SYS addr
+- [X] 1nnn - JP addr
+- [X] 2nnn - CALL addr
+- [X] 3xkk - SE Vx, byte
+- [X] 4xkk - SNE Vx, byte
+- [X] 5xy0 - SE Vx, Vy
+- [X] 6xkk - LD Vx, byte
+- [X] 7xkk - ADD Vx, byte
+- [X] 8xy0 - LD Vx, Vy
+- [X] 8xy1 - OR Vx, Vy
+- [X] 8xy2 - AND Vx, Vy
+- [X] 8xy3 - XOR Vx, Vy
+- [X] 8xy4 - ADD Vx, Vy
+- [X] 8xy5 - SUB Vx, Vy
 - [ ] 8xy6 - SHR Vx {, Vy}
 - [ ] 8xy7 - SUBN Vx, Vy
 - [ ] 8xyE - SHL Vx {, Vy}
