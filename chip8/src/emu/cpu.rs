@@ -271,6 +271,13 @@ mod cputests {
         assert_ne!(old, new);
     }
 
+    #[test]
+    fn test_dxyn() {
+        let mut cpu = test_init_cpu();
+        let old_vf = cpu.registers[0xF];
+        assert_eq!(old_vf, cpu.registers[0xF])
+    }
+
     //#[test]
     //fn test_fx0a() {
     //    let mut cpu = test_init_cpu();

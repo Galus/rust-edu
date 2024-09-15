@@ -134,8 +134,36 @@ impl OpCode {
 
     /// Draw a sprite at position vX, vY with N bytes of sprite data starting at the address
     /// stored in I. Set vF to 01 if any set pixels are changed to unset, and 00 otherwise.
-    pub fn dxyn(_cpu: &mut Cpu) {
-        todo!()
+    pub fn dxyn(cpu: &mut Cpu) {
+        let (_, x, y, n) = OpCode::into_tuple(&cpu.current_opcode);
+        let start = cpu.index_register as usize;
+        let end = start + (n as usize);
+        let sprite_data = &cpu.memory.ram[start..end];
+        let (vx, vy) = (cpu.registers[x as usize], cpu.registers[y as usize]);
+        let screen_offset = (vy * crate::emu::gpu::SCREEN_WIDTH as u8 + vx) as usize;
+        // for each sprite byte
+        for i in 0..n {
+            let screen_start = screen_offset + (i as usize) * 8;
+            let old_pixels = &mut cpu.memory.gpu.screen[screen_start..(screen_start + 8)];
+            let sprite_byte = sprite_data[i as usize];
+            let new_pixels: Vec<bool> = old_pixels
+                .iter()
+                .zip((0..8).map(|bit| (sprite_byte & (1 << (7 - bit))) != 0))
+                .map(|(&old, new)| old ^ new)
+                .collect();
+
+            // Check if pixels erased: any pixels were flipped from set to unset
+            if old_pixels
+                .iter()
+                .zip(new_pixels.iter())
+                .any(|(&old, &new)| old && !new)
+            {
+                cpu.registers[0xF] = 1;
+            }
+
+            // Update the screen with new pixels
+            old_pixels.copy_from_slice(&new_pixels);
+        }
     }
 
     /// Set vX to a random number with a mask of NN
