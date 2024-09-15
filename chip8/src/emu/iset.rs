@@ -182,7 +182,7 @@ impl OpCode {
         let (_, n1, n2, n3) = cpu.current_opcode.into_tuple(); //opcodes are u16
         let address = (n1 as u16) << 8 | (n2 as u16) << 4 | n3 as u16;
         let added_address = cpu.registers[0] as u16 + address;
-        cpu.index_register = added_address;
+        cpu.program_counter = added_address;
     }
 
     /// Store memory address NNN in register I
