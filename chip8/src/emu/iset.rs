@@ -143,10 +143,7 @@ impl OpCode {
             cpu.registers[x as usize] as usize,
             cpu.registers[y as usize] as usize,
         );
-        //println!("iset::dxyn: vx: {:?}, vy: {:?}", vx, vy);
-        //println!("iset::dxyn: calculating screen offset...");
         let screen_offset = vy.wrapping_mul(crate::emu::gpu::SCREEN_WIDTH) + vx;
-        //println!("iset::dxyn::screen_offset: {:?}", screen_offset);
         // for each sprite byte
         for i in 0..n {
             let screen_start = screen_offset + (i as usize) * 8;
