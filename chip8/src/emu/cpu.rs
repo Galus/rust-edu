@@ -300,7 +300,6 @@ mod cputests {
     #[test]
     fn test_dxyn() {
         let mut cpu = test_init_cpu();
-        //cpu.current_opcode = OpCode(0xF70A);
         let old_vf = cpu.registers[0xF];
         // assert old_vf is not set
         assert_eq!(old_vf, 0);
