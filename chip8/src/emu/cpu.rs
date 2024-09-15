@@ -360,26 +360,55 @@ mod cputests {
         OpCode::dxyn(&mut cpu);
         println!("screen (after writing to bottom-right of screen):");
         println!("{:x?}", cpu.memory.gpu.screen.map(|bool| bool as u8));
-        assert_eq!(cpu.registers[0xF], 0);
+        assert_eq!(cpu.registers[0xF], 0); // see if the unset flag in vF remained at 0
 
-        //const X: usize = 8;
-        //cpu.registers[X] = VX;
-        //const Y: usize = 0xa;
-        //cpu.registers[Y] = VY;
-        //
-        //println!("screen:");
-        //println!("{:x?}", cpu.memory.gpu.screen.map(|bool| bool as u8));
-        //
-        //println!("Running the function dxyn()");
-        //OpCode::dxyn(&mut cpu);
-        //
-        //println!("screen:");
-        //println!("{:x?}", cpu.memory.gpu.screen.map(|bool| bool as u8));
-        //
-        //// calculate offset in screen for this
-        //let offset = W.wrapping_mul(VY as usize) + VX as usize;
-        //assert_eq!(cpu.memory.gpu.screen[offset..offset + 8], pixel_byte1);
-        //assert_eq!(cpu.memory.gpu.screen[offset + 8..offset + 16], pixel_byte2);
+        // calculate offset in screen for this bottom-right test
+        let offset = W.wrapping_mul(VY as usize) + VX as usize;
+        assert_eq!(cpu.memory.gpu.screen[offset..offset + 8], pixel_byte1);
+        assert_eq!(cpu.memory.gpu.screen[offset + 8..offset + 16], pixel_byte2);
+
+        // Lets draw into an already populated set portion of the screen
+        // ... At position 96 we have our first set pixel.
+        // ... This is because earlier we populated '1111 0001' in the 'middle of second row'
+        // ... 'middle of 2nd row => 64 + (64/2) => 64 + 32 = 96'
+        let offset = W + (W / 2);
+
+        // convert to a vX, vY
+        let v_x = W / 2;
+        let v_y = 1;
+
+        // .. set these to register 8 and 10
+        cpu.registers[8] = v_x as u8;
+        cpu.registers[0xA] = v_y as u8;
+        cpu.current_opcode = OpCode(0xD8A2);
+
+        OpCode::dxyn(&mut cpu);
+        println!("screen (after overwriting the second-rows set pixels):");
+        println!("{:x?}", cpu.memory.gpu.screen.map(|bool| bool as u8));
+
+        // Remember, pixels are xor'd, you cant assume the screen will have the exact pixel bytes
+        // ...                 if existing pixels = 1111 0001
+        // ...                   and pixel_byte1 = '1010 1010'
+        // ... the xor'd output on the screen is = '0101 1011'
+        let expected_screen_after_xor_pixel_byte1 =
+            [false, true, false, true, true, false, true, true];
+        assert_eq!(
+            cpu.memory.gpu.screen[offset..offset + 8],
+            expected_screen_after_xor_pixel_byte1
+        );
+
+        // ... similarly screen: 0000 0000
+        // ...           pix b2: 0000 0000
+        // ...              xor: 0000 0000
+        let expected_screen_after_xor_pixel_byte2 =
+            [false, false, false, false, false, false, false, false];
+        assert_eq!(
+            cpu.memory.gpu.screen[offset + 8..offset + 16],
+            expected_screen_after_xor_pixel_byte2
+        );
+
+        // ... Last but not least, make sure that the vF unset flag got set to 1
+        assert_eq!(cpu.registers[0xF], 1);
     }
 
     //#[test]
