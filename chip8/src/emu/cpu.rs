@@ -14,6 +14,8 @@ pub struct Cpu {
     // memory: [u8; 4096],
     pub registers: [u8; 16], // general purpose
     /// Address of the current instruction
+    /// can only load 12-bit mem address due to range of mem accessible
+    /// even though its 16 bit address-able
     pub index_register: u16, // can only load 12-bit mem address due to range of mem accessible
     //                      1111 1111 1111 -> 0xFFF -> 4095 -> memsize
     pub program_counter: u16,
@@ -299,9 +301,23 @@ mod cputests {
         // Setup some new pixels to draw!
         //   lets test 2 bytes worth of pixels
         let pixel_byte1 = [true, false, true, false, true, false, true, false];
-        let pixel_byte2 = [false, false, false, false, false, false, false, false];
-
+        let pixel_byte1_u8 = pixel_byte1
+            .iter()
+            .enumerate()
+            .fold(0u8, |acc, (i, &b)| acc | ((b as u8) << (7 - i)));
         // We will use pixel_byte2 one to make sure dxyn's register vF doesnt get set
+        let pixel_byte2 = [false, false, false, false, false, false, false, false];
+        let pixel_byte2_u8 = pixel_byte2
+            .iter()
+            .enumerate()
+            .fold(0u8, |acc, (i, &b)| acc | ((b as u8) << (7 - i)));
+
+        // Put these bytes into the instruction memory somewhere, lets say 1337 :)
+        // 1337 = 0b10100111001, this requires 11 bits, index_register holds up to 12
+        cpu.index_register = 1337;
+        cpu.memory.ram[cpu.index_register as usize] = pixel_byte1_u8;
+        cpu.memory.ram[(cpu.index_register as usize) + 1] = pixel_byte2_u8;
+        println!("{:x?}", cpu.memory.ram.map(|u| u as u8));
     }
 
     //#[test]
