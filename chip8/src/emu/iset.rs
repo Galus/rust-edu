@@ -360,7 +360,12 @@ impl OpCode {
         let vx = cpu.registers[x as usize];
         let vy = cpu.registers[y as usize];
         if vx == vy {
-            cpu.index_register += 1;
+            // Not sure if I should increment program counter by two or increment index_register ?
+            // who knows, future galus
+            // future galus: we need to handle the execution w/ the program_counter
+            // ... the index_register is for interacting with memory and other things
+            // ... and +1 will go to next instruction, so we need to +2 instead
+            cpu.program_counter += 2;
         }
     }
 
@@ -370,9 +375,7 @@ impl OpCode {
         let value = (n2 as u8) << 4 | n3 as u8;
         let vx = cpu.registers[x as usize];
         if vx != value {
-            // Not sure if I should increment program counter by two or increment index_register ?
-            // who knows, future galus
-            cpu.index_register += 1;
+            cpu.program_counter += 2;
         }
     }
 
@@ -382,9 +385,7 @@ impl OpCode {
         let value = (n2 as u8) << 4 | n3 as u8;
         let vx = cpu.registers[x as usize];
         if vx == value {
-            // Not sure if I should increment program counter by two or increment index_register ?
-            // who knows, future galus
-            cpu.index_register += 1;
+            cpu.program_counter += 2;
         }
     }
 
@@ -413,7 +414,7 @@ impl OpCode {
         // otherwise BCD wouldnt allow for 1111, as 9 is the highest bcd.
 
         // for now we just set it as the next address to execute
-        cpu.index_register = address;
+        cpu.program_counter = address;
     }
 
     /// Clear the screen
