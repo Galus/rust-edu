@@ -114,6 +114,7 @@ impl OpCode {
         let pressed_value = cpu.memory.gpu.handle_events().unwrap();
         if pressed_value != vx {
             // skip instruction
+            cpu.program_counter += 2;
         } else {
             // dont skip
         }
@@ -127,8 +128,11 @@ impl OpCode {
         let pressed_value = cpu.memory.gpu.handle_events().unwrap();
         if pressed_value == vx {
             // skip instruction
+            cpu.program_counter += 2;
         } else {
             // dont skip
+            // galus note: I think that program counter being automatically incremented may
+            // start to cause problems... future galus will find out soonTm.
         }
     }
 
@@ -170,6 +174,8 @@ impl OpCode {
     }
 
     /// Set vX to a random number with a mask of NN
+    /// Set Vx = random byte AND kk.
+    /// The interpreter generates a random number from 0 to 255, which is then ANDed with the value kk. The results are stored in Vx. See instruction 8xy2 for more information on AND.
     pub fn cxnn(cpu: &mut Cpu) {
         let (_, x, n2, n3) = cpu.current_opcode.into_tuple(); //opcodes are u16
         let rng = rand::random::<u8>();

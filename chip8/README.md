@@ -41,14 +41,14 @@ inspired my project layout to funnel all the things into the cpu.
 - [X] 8xy3 - XOR Vx, Vy
 - [X] 8xy4 - ADD Vx, Vy
 - [X] 8xy5 - SUB Vx, Vy
-- [ ] 8xy6 - SHR Vx {, Vy}
-- [ ] 8xy7 - SUBN Vx, Vy
-- [ ] 8xyE - SHL Vx {, Vy}
-- [ ] 9xy0 - SNE Vx, Vy
-- [ ] Annn - LD I, addr
-- [ ] Bnnn - JP V0, addr
-- [ ] Cxkk - RND Vx, byte
-- [ ] Dxyn - DRW Vx, Vy, nibble
+- [X] 8xy6 - SHR Vx {, Vy}
+- [X] 8xy7 - SUBN Vx, Vy
+- [X] 8xyE - SHL Vx {, Vy}
+- [X] 9xy0 - SNE Vx, Vy
+- [X] Annn - LD I, addr
+- [X] Bnnn - JP V0, addr
+- [X] Cxkk - RND Vx, byte
+- [X] Dxyn - DRW Vx, Vy, nibble
 - [ ] Ex9E - SKP Vx
 - [ ] ExA1 - SKNP Vx
 - [ ] Fx07 - LD Vx, DT
