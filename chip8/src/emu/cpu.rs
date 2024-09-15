@@ -275,7 +275,33 @@ mod cputests {
     fn test_dxyn() {
         let mut cpu = test_init_cpu();
         let old_vf = cpu.registers[0xF];
-        assert_eq!(old_vf, cpu.registers[0xF])
+        // assert old_vf is not set
+        assert_eq!(old_vf, 0);
+        assert_eq!(old_vf, cpu.registers[0xF]);
+
+        // assert blank screen
+        const W: usize = 64;
+        const H: usize = 32;
+        assert_eq!(cpu.memory.gpu.screen, [false; W * H]);
+
+        // Setup some existing screen data
+        // lets draw '1111 0001' in the middle of second row
+        //    Calc the offset
+        let offset = W + (W / 2);
+        cpu.memory.gpu.screen[offset..(offset + 4)].fill(true);
+        cpu.memory.gpu.screen[offset + 7] = true;
+        println!("{:x?}", cpu.memory.gpu.screen.map(|bool| bool as u32));
+        assert_eq!(
+            cpu.memory.gpu.screen[offset..(offset + 8)],
+            [true, true, true, true, false, false, false, true]
+        );
+
+        // Setup some new pixels to draw!
+        //   lets test 2 bytes worth of pixels
+        let pixel_byte1 = [true, false, true, false, true, false, true, false];
+        let pixel_byte2 = [false, false, false, false, false, false, false, false];
+
+        // We will use pixel_byte2 one to make sure dxyn's register vF doesnt get set
     }
 
     //#[test]
