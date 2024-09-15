@@ -411,6 +411,9 @@ impl OpCode {
         // where 0000 1111     0000 1011     0000 0111 implies -> 1111 1011 0111
         //              15            11             6         ->    E    B    6
         // otherwise BCD wouldnt allow for 1111, as 9 is the highest bcd.
+
+        // for now we just set it as the next address to execute
+        cpu.index_register = address;
     }
 
     /// Clear the screen
