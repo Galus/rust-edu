@@ -166,6 +166,8 @@ impl OpCode {
                 .any(|(&old, &new)| old && !new)
             {
                 cpu.registers[0xF] = 1;
+            } else {
+                cpu.registers[0xF] = 0;
             }
 
             // Update the screen with new pixels

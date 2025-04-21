@@ -2,6 +2,8 @@
 
 This is a CHIP-8 emulator implemented in Rust. CHIP-8 is an interpreted programming language developed in the 1970s, primarily used on 8-bit microcomputers and for creating simple video games.
 
+- 4/20/25 Add tui-logger and ratatui tracing. Enable logging to ease development.
+
 ## Project Structure
 
 The project is organized into the following modules:
