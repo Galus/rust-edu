@@ -1,0 +1,3 @@
+[submodule "emulator-chip-8-rust"]
+	path = emulator-chip-8-rust
+	url = git@github.com:Galus/emulator-chip-8-rust.git
